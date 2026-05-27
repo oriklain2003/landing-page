@@ -538,9 +538,743 @@
     50%{background-position:100% 50%}
   }
   @media (prefers-reduced-motion:reduce){h1 .grad{animation:none}}
+
+  /* ============================================================
+     INTRO SCENARIO — first-visit cinematic
+     ============================================================ */
+  html.intro-show body{overflow:hidden;height:100vh}
+  html.intro-show .scroll-prog{display:none}
+  html.intro-show .cursor-dot,html.intro-show .cursor-ring{display:none}
+  html:not(.intro-show) .intro-sim{display:none}
+
+  .intro-sim{
+    position:fixed;inset:0;z-index:9000;
+    background:#020305;
+    font-family:var(--sans);
+    overflow:hidden;isolation:isolate;
+    color:var(--text);
+  }
+  .intro-sim.dismissed{
+    opacity:0;pointer-events:none;
+    transition:opacity .55s var(--ease);
+  }
+
+  .intro-bg{
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    background:
+      radial-gradient(ellipse 65% 55% at 50% 45%, rgba(94,234,212,.05), transparent 65%),
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(239,68,68,.04), transparent 60%),
+      radial-gradient(ellipse 40% 40% at 0% 0%, rgba(94,234,212,.04), transparent 60%);
+  }
+  .intro-noise{
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    opacity:.05;mix-blend-mode:overlay;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px);
+  }
+
+  .intro-map{
+    position:absolute;inset:0;width:100%;height:100%;z-index:2;
+    filter:contrast(1.04);
+  }
+  .intro-map text{user-select:none}
+
+  /* operational chrome */
+  .intro-chrome{
+    position:absolute;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px 32px;
+    z-index:5;
+    font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);
+    pointer-events:none;
+  }
+  .intro-chrome > div{display:flex;gap:18px;align-items:center}
+  .intro-tag{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 11px 6px 12px;
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(8px);
+    color:var(--text);font-weight:500;
+  }
+  .intro-tag .blip{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--danger);
+    box-shadow:0 0 10px var(--danger);
+    animation:introBlip 1.4s ease-in-out infinite;
+  }
+  @keyframes introBlip{0%,100%{opacity:1}50%{opacity:.3}}
+  .intro-coord,.intro-frame,.intro-src{color:var(--dim);font-variant-numeric:tabular-nums}
+  .intro-src b{color:var(--text);font-weight:500}
+
+  /* tactical corners */
+  .intro-corners{position:absolute;inset:20px;pointer-events:none;z-index:4}
+  .intro-corners .cn{
+    position:absolute;width:20px;height:20px;
+    border:1px solid rgba(94,234,212,.45);
+  }
+  .intro-corners .tl{top:0;left:0;border-right:0;border-bottom:0}
+  .intro-corners .tr{top:0;right:0;border-left:0;border-bottom:0}
+  .intro-corners .bl{bottom:0;left:0;border-right:0;border-top:0}
+  .intro-corners .br{bottom:0;right:0;border-left:0;border-top:0}
+
+  /* map elements */
+  .intro-grat line{stroke:rgba(94,234,212,.055);stroke-width:.7}
+  .intro-grat .major{stroke:rgba(94,234,212,.11)}
+  .intro-grat text{
+    fill:rgba(94,234,212,.32);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;
+  }
+  .intro-land{
+    fill:rgba(94,234,212,.022);
+    stroke:rgba(94,234,212,.32);
+    stroke-width:1;
+  }
+  .intro-coast-glow{
+    fill:none;
+    stroke:rgba(94,234,212,.12);
+    stroke-width:5;
+    filter:blur(2px);
+  }
+  .intro-sea-label{
+    fill:rgba(94,234,212,.14);
+    font-family:var(--mono);font-size:11px;
+    letter-spacing:.34em;text-transform:uppercase;font-weight:300;
+  }
+  .intro-cities .pin{fill:rgba(94,234,212,.9);filter:drop-shadow(0 0 6px rgba(94,234,212,.7))}
+  .intro-cities .pin-ring{fill:none;stroke:rgba(94,234,212,.35);stroke-width:1}
+  .intro-cities .pin-mil{fill:var(--warn);filter:drop-shadow(0 0 6px rgba(251,191,36,.7))}
+  .intro-cities .city-lbl{
+    fill:rgba(94,234,212,.85);
+    font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;font-weight:500;
+  }
+  .intro-cities .city-lbl-sub{
+    fill:rgba(94,234,212,.4);
+    font-family:var(--mono);font-size:8px;letter-spacing:.12em;
+  }
+  .intro-cities .city-lbl-warn{
+    fill:rgba(251,191,36,.85);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;font-weight:500;
+  }
+
+  /* background civilian traffic */
+  .intro-bg-ac{pointer-events:none}
+  .intro-bg-ac .bg-plane{
+    fill:rgba(122,196,255,.92);
+    stroke:rgba(255,255,255,.8);
+    stroke-width:.4;
+    filter:drop-shadow(0 0 3px rgba(94,180,255,.6));
+  }
+  .intro-bg-ac .bg-plane.ground{
+    fill:rgba(190,210,230,.55);
+    stroke:none;
+    filter:none;
+  }
+  .intro-bg-ac .bg-cs-lbl{
+    fill:rgba(190,220,240,.6);
+    font-family:var(--mono);font-size:6.5px;letter-spacing:.04em;
+  }
+
+  /* aircraft */
+  .intro-ac{cursor:pointer;transition:filter .22s var(--ease)}
+  .intro-ac:hover,.intro-ac.hover{filter:drop-shadow(0 0 12px rgba(94,234,212,.95))}
+  .intro-ac .ac-icon{
+    fill:#a8fce8;
+    stroke:#ffffff;
+    stroke-width:.6;
+    filter:drop-shadow(0 0 5px rgba(94,234,212,.95)) drop-shadow(0 0 14px rgba(94,234,212,.5));
+  }
+  .intro-ac .ac-icon-rot{transform-box:fill-box;transform-origin:center}
+  .intro-ac .ac-halo{fill:url(#intro-halo-grad);pointer-events:none}
+  .intro-ac .ac-pulse{
+    fill:none;stroke:rgba(94,234,212,.55);stroke-width:1;
+    transform-box:fill-box;transform-origin:center;
+    animation:introPulse 2.6s cubic-bezier(.2,.7,.2,1) infinite;
+    pointer-events:none;
+  }
+  .intro-ac .ac-pulse.d1{animation-delay:.4s}
+  .intro-ac .ac-pulse.d2{animation-delay:.85s}
+  @keyframes introPulse{
+    0%{r:5;opacity:.7}
+    100%{r:30;opacity:0}
+  }
+  .intro-ac .ac-label{
+    fill:rgba(229,251,243,.98);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;font-weight:600;
+    pointer-events:none;
+    paint-order:stroke;
+    stroke:rgba(2,3,5,.85);stroke-width:3px;stroke-linejoin:round;
+  }
+  .intro-ac .ac-label-sub{
+    fill:rgba(94,234,212,.75);
+    font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+    pointer-events:none;
+    paint-order:stroke;
+    stroke:rgba(2,3,5,.7);stroke-width:2.5px;stroke-linejoin:round;
+  }
+  .intro-ac.hover .ac-icon{stroke:#fff;stroke-width:.8}
+
+  .intro-trail-glow{
+    fill:none;stroke:rgba(94,234,212,.16);stroke-width:7;
+    stroke-linecap:round;stroke-linejoin:round;
+    filter:blur(2px);
+  }
+  .intro-trail{
+    fill:none;stroke:rgba(94,234,212,.55);stroke-width:1.4;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .intro-trail-future{
+    fill:none;stroke:rgba(94,234,212,.16);stroke-width:1;
+    stroke-dasharray:3 4;
+  }
+
+  /* countdown */
+  .intro-countdown{
+    position:absolute;top:80px;left:50%;transform:translateX(-50%);
+    z-index:6;text-align:center;pointer-events:none;
+  }
+  .intro-cd-label{
+    font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.28em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:6px;
+  }
+  .intro-cd-num{
+    font-family:var(--mono);
+    font-size:clamp(56px,9vw,108px);
+    font-weight:500;letter-spacing:-.045em;
+    color:var(--text);line-height:1;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 24px rgba(255,255,255,.14);
+    transition:color .35s var(--ease),text-shadow .35s var(--ease);
+  }
+  .intro-cd-num.warn{color:var(--warn);text-shadow:0 0 30px rgba(251,191,36,.4)}
+  .intro-cd-num.danger{color:var(--danger);text-shadow:0 0 36px rgba(239,68,68,.48)}
+  .intro-cd-num.danger{animation:introCdShake .14s linear infinite}
+  @keyframes introCdShake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-1.2px)}
+    75%{transform:translateX(1.2px)}
+  }
+  .intro-cd-progress{
+    width:240px;height:2px;background:rgba(255,255,255,.06);
+    border-radius:2px;overflow:hidden;margin:14px auto 0;
+  }
+  .intro-cd-progress > div{
+    height:100%;width:100%;
+    background:linear-gradient(90deg,var(--accent),var(--accent));
+    transform-origin:right center;
+    transition:background .35s var(--ease);
+  }
+
+  /* tooltip */
+  .intro-tooltip{
+    position:absolute;z-index:7;
+    padding:14px 18px;
+    background:rgba(8,10,14,.94);
+    border:1px solid var(--line-strong);
+    border-radius:10px;
+    font-family:var(--mono);font-size:11.5px;
+    color:var(--text);pointer-events:none;
+    opacity:0;transform:translate(0,4px);
+    transition:opacity .22s var(--ease),transform .22s var(--ease);
+    backdrop-filter:blur(10px);
+    min-width:240px;
+    box-shadow:0 6px 32px rgba(0,0,0,.7);
+  }
+  .intro-tooltip.show{opacity:1;transform:translate(0,0)}
+  .intro-tt-callsign{
+    font-size:15px;color:var(--accent);font-weight:600;
+    letter-spacing:.04em;margin-bottom:4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .intro-tt-type{
+    color:var(--muted);font-size:10px;
+    letter-spacing:.16em;text-transform:uppercase;
+    margin-bottom:12px;padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .intro-tt-rows{display:grid;grid-template-columns:54px 1fr;gap:6px 14px;margin:0}
+  .intro-tt-rows dt{color:var(--dim);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;align-self:center}
+  .intro-tt-rows dd{
+    color:var(--text);
+    font-variant-numeric:tabular-nums;
+    margin:0;font-size:11.5px;
+  }
+  .intro-tt-rows dd.warn{color:var(--warn)}
+
+  /* question + buttons */
+  .intro-question{
+    position:absolute;left:50%;bottom:56px;
+    transform:translateX(-50%) translateY(8px);
+    z-index:6;text-align:center;
+    max-width:760px;width:calc(100% - 64px);
+    opacity:0;
+    transition:opacity .8s var(--ease) .8s,transform .8s var(--ease) .8s;
+  }
+  .intro-question.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .intro-q-eyebrow{
+    font-family:var(--mono);font-size:10px;
+    letter-spacing:.26em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:14px;
+    display:inline-flex;align-items:center;gap:10px;
+  }
+  .intro-q-eyebrow::before,.intro-q-eyebrow::after{
+    content:"";width:24px;height:1px;background:rgba(94,234,212,.3);
+  }
+  .intro-q-text{
+    font-size:clamp(22px,2.9vw,34px);
+    font-weight:500;letter-spacing:-.018em;
+    color:var(--text);margin-bottom:28px;
+    line-height:1.2;
+  }
+  .intro-q-buttons{
+    display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  }
+  .intro-btn{
+    display:inline-flex;align-items:center;gap:14px;
+    padding:15px 22px;
+    background:rgba(12,14,19,.7);
+    border:1px solid var(--line-strong);
+    border-radius:12px;
+    color:var(--text);
+    font-family:var(--sans);font-size:14.5px;
+    text-align:left;cursor:pointer;
+    transition:.25s var(--ease);
+    backdrop-filter:blur(10px);
+    min-width:300px;
+  }
+  .intro-btn:hover,.intro-btn:focus-visible{
+    border-color:var(--accent);
+    background:rgba(94,234,212,.06);
+    transform:translateY(-1.5px);
+    box-shadow:0 8px 28px rgba(94,234,212,.2);
+    outline:none;
+  }
+  .intro-btn:active{transform:translateY(0)}
+  .intro-btn-key{
+    width:28px;height:28px;border-radius:7px;
+    display:grid;place-items:center;
+    background:rgba(94,234,212,.1);
+    color:var(--accent);
+    font-family:var(--mono);font-size:12px;font-weight:600;
+    border:1px solid rgba(94,234,212,.28);
+    flex-shrink:0;
+  }
+  .intro-btn-label{flex:1;line-height:1.3}
+
+  /* reveal */
+  .intro-reveal{
+    position:absolute;inset:0;z-index:8;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:48px 40px;text-align:center;
+    background:rgba(2,3,5,.92);
+    backdrop-filter:blur(24px);
+    opacity:0;pointer-events:none;
+    transition:opacity .6s var(--ease);
+    overflow-y:auto;
+  }
+  .intro-reveal.show{opacity:1;pointer-events:auto}
+  .intro-reveal-inner{
+    max-width:1080px;width:100%;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .intro-reveal-eyebrow{
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:24px;
+    display:inline-flex;align-items:center;gap:14px;
+  }
+  .intro-reveal-eyebrow::before,.intro-reveal-eyebrow::after{
+    content:"";width:36px;height:1px;background:var(--accent);opacity:.5;
+  }
+  .intro-reveal-text{
+    font-size:clamp(38px,6.2vw,84px);
+    font-weight:600;letter-spacing:-.028em;
+    line-height:1.02;margin-bottom:34px;
+    color:var(--text);
+  }
+  .intro-reveal-text .grad{
+    background:linear-gradient(135deg,#5eead4 0%,#38bdf8 55%,#a78bfa 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    background-size:200% 100%;
+    animation:gradShimmer 12s var(--ease) infinite;
+  }
+  .intro-reveal-sub{
+    font-size:16px;line-height:1.65;
+    color:var(--muted);max-width:660px;
+    margin-bottom:44px;
+  }
+  .intro-reveal-sub strong{color:var(--text);font-weight:500}
+  .intro-reveal-sub code{
+    font-family:var(--mono);background:var(--panel);
+    padding:2px 6px;border-radius:4px;font-size:13px;color:var(--accent);
+  }
+
+  /* solve cards */
+  .intro-solve{
+    width:100%;margin-bottom:40px;
+  }
+  .intro-solve-eyebrow{
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.26em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:18px;text-align:center;
+    display:inline-flex;align-items:center;gap:14px;
+    width:100%;justify-content:center;
+  }
+  .intro-solve-eyebrow::before,.intro-solve-eyebrow::after{
+    content:"";flex:0 1 80px;height:1px;background:rgba(255,255,255,.08);
+  }
+  .intro-solve-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .intro-solve-card{
+    border:1px solid var(--line-strong);
+    border-radius:12px;
+    padding:24px 22px;
+    background:rgba(12,14,19,.6);
+    text-align:left;
+    transition:.3s var(--ease);
+    backdrop-filter:blur(6px);
+  }
+  .intro-solve-card:hover{
+    border-color:rgba(94,234,212,.4);
+    background:rgba(94,234,212,.03);
+    transform:translateY(-2px);
+  }
+  .intro-solve-num{
+    font-family:var(--mono);font-size:10.5px;
+    color:var(--accent);letter-spacing:.16em;
+    margin-bottom:10px;font-weight:600;
+  }
+  .intro-solve-h{
+    font-size:16px;font-weight:600;
+    color:var(--text);letter-spacing:-.012em;
+    margin-bottom:10px;line-height:1.3;
+  }
+  .intro-solve-p{
+    font-size:13.5px;line-height:1.55;
+    color:var(--muted);margin:0;
+  }
+  @media (max-width:880px){
+    .intro-solve-grid{grid-template-columns:1fr;gap:10px}
+    .intro-solve-card{padding:18px 20px}
+    .intro-solve-card:hover{transform:none}
+  }
+  @media (max-height:780px){
+    .intro-reveal-text{font-size:clamp(30px,4.6vw,56px);margin-bottom:22px}
+    .intro-reveal-sub{margin-bottom:28px;font-size:14.5px}
+    .intro-solve{margin-bottom:24px}
+    .intro-solve-card{padding:16px 18px}
+  }
+  .intro-continue{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:14px 28px;
+    background:var(--accent);color:var(--bg);
+    border:none;border-radius:999px;
+    font-family:var(--sans);font-size:14px;
+    font-weight:600;letter-spacing:.04em;
+    cursor:pointer;
+    transition:.25s var(--ease);
+  }
+  .intro-continue:hover{
+    transform:translateY(-1.5px);
+    box-shadow:0 10px 36px rgba(94,234,212,.42);
+  }
+  .intro-skip{
+    position:absolute;top:22px;right:32px;z-index:6;
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.18em;text-transform:uppercase;
+    color:var(--dim);background:none;border:none;cursor:pointer;
+    padding:8px 10px;
+    transition:color .25s var(--ease);
+  }
+  .intro-skip:hover{color:var(--text)}
+  .intro-skip kbd{
+    font-family:var(--mono);font-size:9.5px;
+    padding:2px 5px;margin-left:6px;
+    border:1px solid var(--line-strong);
+    border-radius:3px;color:var(--muted);
+  }
+
+  /* mobile */
+  @media (max-width:760px){
+    .intro-chrome{padding:14px 18px;font-size:10px}
+    .intro-chrome .intro-coord,.intro-chrome .intro-frame,.intro-chrome .intro-src{display:none}
+    .intro-countdown{top:64px}
+    .intro-cd-label{font-size:9px}
+    .intro-cd-progress{width:180px}
+    .intro-question{bottom:28px;width:calc(100% - 32px)}
+    .intro-q-buttons{flex-direction:column;gap:10px}
+    .intro-btn{min-width:0;width:100%;padding:13px 16px;font-size:13.5px}
+    .intro-btn-label{font-size:13px}
+    .intro-reveal{padding:28px}
+    .intro-reveal-sub{font-size:14px}
+    .intro-skip{top:14px;right:18px;font-size:10px}
+    .intro-skip kbd{display:none}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .intro-cd-num.danger{animation:none}
+    .intro-ac .ac-pulse{animation:none;display:none}
+    .intro-tag .blip{animation:none}
+    .intro-reveal-text .grad{animation:none}
+  }
+
+  /* Simulation trigger */
+  header.nav .nav-links a.sim-cta{
+    color:var(--accent);
+    padding:6px 14px;
+    border:1px solid rgba(94,234,212,.4);
+    border-radius:999px;
+    font-weight:500;
+    transition:.25s var(--ease);
+  }
+  header.nav .nav-links a.sim-cta:hover{
+    background:rgba(94,234,212,.08);
+    border-color:var(--accent);
+    color:var(--text);
+  }
+  .hero-cta{margin:-12px 0 4px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .run-sim-btn{
+    display:inline-flex;align-items:center;gap:12px;
+    padding:14px 26px;
+    background:var(--accent);color:var(--bg);
+    border:none;border-radius:999px;
+    font-family:var(--sans);font-size:14.5px;font-weight:600;
+    letter-spacing:.02em;cursor:pointer;
+    transition:.25s var(--ease);
+  }
+  .run-sim-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(94,234,212,.4)}
+  .run-sim-btn .play{
+    display:grid;place-items:center;
+    width:22px;height:22px;border-radius:50%;
+    background:rgba(0,0,0,.16);
+    font-size:9px;padding-left:2px;
+  }
+  .run-sim-hint{
+    font-family:var(--mono);font-size:11px;color:var(--dim);
+    letter-spacing:.14em;text-transform:uppercase;
+  }
 </style>
 </head>
 <body>
+
+<!-- ============== INTRO SCENARIO ============== -->
+<div class="intro-sim" id="intro-sim" role="dialog" aria-modal="true" aria-label="Initial scenario">
+  <div class="intro-bg" aria-hidden="true"></div>
+  <div class="intro-noise" aria-hidden="true"></div>
+
+  <svg class="intro-map" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg"
+       preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="intro-halo-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"  stop-color="#5eead4" stop-opacity="0.55"/>
+        <stop offset="55%" stop-color="#5eead4" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="intro-vignette" cx="50%" cy="50%" r="55%">
+        <stop offset="50%"  stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity=".6"/>
+      </radialGradient>
+      <filter id="intro-soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- vignette -->
+    <rect width="1000" height="700" fill="url(#intro-vignette)"/>
+
+    <!-- graticules: every degree -->
+    <g class="intro-grat" aria-hidden="true">
+      <!-- latitude lines (every degree, majors at 5° step) -->
+      <line x1="0" y1="58.3" x2="1000" y2="58.3"/>
+      <line x1="0" y1="116.7" x2="1000" y2="116.7" class="major"/>
+      <line x1="0" y1="175"   x2="1000" y2="175"/>
+      <line x1="0" y1="233.3" x2="1000" y2="233.3"/>
+      <line x1="0" y1="291.7" x2="1000" y2="291.7"/>
+      <line x1="0" y1="350"   x2="1000" y2="350"  class="major"/>
+      <line x1="0" y1="408.3" x2="1000" y2="408.3"/>
+      <line x1="0" y1="466.7" x2="1000" y2="466.7"/>
+      <line x1="0" y1="525"   x2="1000" y2="525"/>
+      <line x1="0" y1="583.3" x2="1000" y2="583.3"/>
+      <!-- longitude lines -->
+      <line x1="76.9"  y1="0" x2="76.9"  y2="700"/>
+      <line x1="153.8" y1="0" x2="153.8" y2="700"/>
+      <line x1="230.8" y1="0" x2="230.8" y2="700" class="major"/>
+      <line x1="307.7" y1="0" x2="307.7" y2="700"/>
+      <line x1="384.6" y1="0" x2="384.6" y2="700"/>
+      <line x1="461.5" y1="0" x2="461.5" y2="700"/>
+      <line x1="538.5" y1="0" x2="538.5" y2="700"/>
+      <line x1="615.4" y1="0" x2="615.4" y2="700" class="major"/>
+      <line x1="692.3" y1="0" x2="692.3" y2="700"/>
+      <line x1="769.2" y1="0" x2="769.2" y2="700"/>
+      <line x1="846.2" y1="0" x2="846.2" y2="700"/>
+      <line x1="923.1" y1="0" x2="923.1" y2="700"/>
+      <!-- grid degree labels -->
+      <text x="234" y="694">28°E</text>
+      <text x="619" y="694">33°E</text>
+      <text x="8"   y="120">40°N</text>
+      <text x="8"   y="354">36°N</text>
+    </g>
+
+    <!-- sea labels -->
+    <text class="intro-sea-label" x="500" y="40">B L A C K   S E A</text>
+    <text class="intro-sea-label" x="300" y="490">M E D I T E R R A N E A N</text>
+
+    <!-- coast soft glow -->
+    <g aria-hidden="true">
+      <path class="intro-coast-glow" d="M 77 58 L 154 47 L 231 47 L 538 0 L 846 29 L 1000 58 L 1000 262 L 846 315 L 615 333 L 461 321 L 308 321 L 154 309 L 77 175 Z"/>
+      <path class="intro-coast-glow" d="M 846 315 L 1000 292 L 1000 642 L 754 608 L 769 549 L 785 508 L 807 472 L 815 446 L 831 433 L 831 379 Z"/>
+      <path class="intro-coast-glow" d="M 562 411 L 615 390 L 692 379 L 738 367 L 730 395 L 692 411 L 615 428 L 577 417 Z"/>
+    </g>
+
+    <!-- land polygons -->
+    <g class="intro-land">
+      <!-- Turkey -->
+      <path d="M 77 58 L 154 47 L 231 47 L 538 0 L 846 29 L 1000 58 L 1000 262 L 846 315 L 615 333 L 461 321 L 308 321 L 154 309 L 77 175 Z"/>
+      <!-- Syria-Lebanon-Israel-NW Saudi/Jordan strip -->
+      <path d="M 846 315 L 1000 292 L 1000 642 L 754 608 L 769 549 L 785 508 L 807 472 L 815 446 L 831 433 L 831 379 Z"/>
+      <!-- Egypt / Sinai -->
+      <path d="M 0 700 L 1000 700 L 1000 642 L 754 608 L 731 632 L 711 624 L 562 627 L 385 630 L 231 635 L 0 645 Z"/>
+      <!-- Cyprus -->
+      <path d="M 562 411 L 615 390 L 692 379 L 738 367 L 730 395 L 692 411 L 615 428 L 577 417 Z"/>
+      <!-- Greece sliver (NW edge) -->
+      <path d="M 0 0 L 92 30 L 70 110 L 50 190 L 26 250 L 0 280 Z"/>
+      <!-- Crete -->
+      <ellipse cx="118" cy="478" rx="58" ry="9"/>
+      <!-- Rhodes -->
+      <ellipse cx="148" cy="368" rx="9" ry="4"/>
+      <!-- Karpathos sliver -->
+      <ellipse cx="118" cy="402" rx="6" ry="3"/>
+    </g>
+
+    <!-- country/region labels -->
+    <g aria-hidden="true">
+      <text x="540" y="170" class="intro-sea-label" style="font-size:13px;letter-spacing:.42em;fill:rgba(94,234,212,.16)">T U R K E Y</text>
+      <text x="892" y="455" class="intro-sea-label" style="font-size:11px;letter-spacing:.34em;fill:rgba(94,234,212,.16)">SYRIA</text>
+      <text x="892" y="528" class="intro-sea-label" style="font-size:9.5px;letter-spacing:.32em;fill:rgba(94,234,212,.13)">JORDAN</text>
+      <text x="640" y="670" class="intro-sea-label" style="font-size:10px;letter-spacing:.32em;fill:rgba(94,234,212,.16)">EGYPT · SINAI</text>
+    </g>
+
+    <!-- cities -->
+    <g class="intro-cities" filter="url(#intro-soft-glow)">
+      <!-- Istanbul -->
+      <g transform="translate(308,52)">
+        <circle r="9" class="pin-ring"/>
+        <circle r="3" class="pin"/>
+        <text x="12" y="-2" class="city-lbl">ISTANBUL</text>
+        <text x="12" y="10" class="city-lbl-sub">LTBA · LTFM</text>
+      </g>
+      <!-- Ankara -->
+      <g transform="translate(577,117)">
+        <circle r="2.5" class="pin"/>
+        <text x="10" y="4" class="city-lbl">ANKARA</text>
+      </g>
+      <!-- Adana -->
+      <g transform="translate(782,302)">
+        <circle r="2.5" class="pin"/>
+        <text x="10" y="4" class="city-lbl">ADANA</text>
+        <text x="10" y="16" class="city-lbl-sub">INCIRLIK AB</text>
+      </g>
+      <!-- Lattakia / Khmeimim -->
+      <g transform="translate(831,378)">
+        <circle r="10" class="pin-ring" stroke="rgba(251,191,36,.5)"/>
+        <circle r="3" class="pin-mil"/>
+        <text x="-12" y="-12" class="city-lbl" style="fill:rgba(251,191,36,.9)">LATTAKIA</text>
+        <text x="-12" y="-1" class="city-lbl-warn">KHMEIMIM AB · RUS</text>
+      </g>
+      <!-- Beirut -->
+      <g transform="translate(807,472)">
+        <circle r="2.5" class="pin"/>
+        <text x="-58" y="3" class="city-lbl">BEIRUT</text>
+      </g>
+      <!-- Damascus -->
+      <g transform="translate(869,496)">
+        <circle r="2.5" class="pin"/>
+        <text x="9" y="4" class="city-lbl">DAMASCUS</text>
+      </g>
+      <!-- Tel Aviv -->
+      <g transform="translate(754,592)">
+        <circle r="2.5" class="pin"/>
+        <text x="-66" y="4" class="city-lbl">TEL AVIV</text>
+      </g>
+      <!-- Cyprus / Akrotiri RAF -->
+      <g transform="translate(644,408)">
+        <circle r="2.5" class="pin"/>
+        <text x="-30" y="-9" class="city-lbl">NICOSIA</text>
+        <text x="-22" y="22" class="city-lbl-sub">RAF AKROTIRI ◣</text>
+      </g>
+    </g>
+
+    <!-- aircraft trails (under aircraft) -->
+    <g id="intro-trails"></g>
+
+    <!-- planned route guides (faint dashed) -->
+    <g id="intro-routes" aria-hidden="true"></g>
+
+    <!-- aircraft (on top) -->
+    <g id="intro-fleet"></g>
+  </svg>
+
+  <div class="intro-corners" aria-hidden="true">
+    <div class="cn tl"></div><div class="cn tr"></div>
+    <div class="cn bl"></div><div class="cn br"></div>
+  </div>
+
+  <div class="intro-chrome" aria-hidden="true">
+    <div>
+      <span class="intro-tag"><span class="blip"></span>LIVE · 1090 MHz</span>
+      <span class="intro-coord" id="intro-coord">N 36° 23' / E 33° 11'</span>
+    </div>
+    <div>
+      <span class="intro-src">SRC <b>ADSBex · FR24 · OPENSKY</b></span>
+      <span class="intro-frame" id="intro-frame">FRAME 0000</span>
+    </div>
+  </div>
+
+  <button class="intro-skip" id="intro-skip" type="button" aria-label="Skip intro">
+    Skip <kbd>Esc</kbd>
+  </button>
+
+  <div class="intro-countdown" aria-hidden="true">
+    <div class="intro-cd-label">Scenario Runtime · seconds</div>
+    <div class="intro-cd-num" id="intro-cd-num">30.00</div>
+    <div class="intro-cd-progress"><div id="intro-cd-bar"></div></div>
+  </div>
+
+  <div class="intro-tooltip" id="intro-tooltip" role="status" aria-live="off"></div>
+
+  <div class="intro-question" id="intro-question">
+    <div class="intro-q-eyebrow">Five-second read · no other context</div>
+    <div class="intro-q-text">What are you looking at?</div>
+    <div class="intro-q-buttons">
+      <button class="intro-btn" data-answer="attack" type="button">
+        <span class="intro-btn-key">A</span>
+        <span class="intro-btn-label">A real signal — IRGC cargo cell, weapons resupply.</span>
+      </button>
+      <button class="intro-btn" data-answer="fake" type="button">
+        <span class="intro-btn-key">B</span>
+        <span class="intro-btn-label">Fake data — somebody is spoofing the feed.</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="intro-reveal" id="intro-reveal" aria-hidden="true">
+    <div class="intro-reveal-inner">
+      <div class="intro-reveal-text">
+        You can't tell.<br>
+        <span class="grad">this is where we come in.</span>
+      </div>
+      <button class="intro-continue" id="intro-continue" type="button">Enter the brief →</button>
+    </div>
+  </div>
+</div>
 
 <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
 <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
@@ -558,6 +1292,7 @@
       <a href="#attacks">Attacks</a>
       <a href="#cases">Cases</a>
       <a href="#approach">Approach</a>
+      <a href="#" class="sim-cta" id="run-sim-link">Simulation</a>
     </nav>
   </div>
 </header>
@@ -618,6 +1353,13 @@
       We've catalogued <strong>32 confirmed and likely cases</strong> — including ones the aggregators silently scrubbed —
       and are building the first detection layer aggregators can deploy directly against their own data.
     </p>
+    <div class="hero-cta reveal d2">
+      <button class="run-sim-btn" id="run-sim-btn" type="button">
+        <span class="play">▶</span>
+        <span>Run the 30-second scenario</span>
+      </button>
+      <span class="run-sim-hint">Live ADS-B · you have five seconds</span>
+    </div>
     <div class="stats reveal d3">
       <div class="stat"><div class="num" data-counter="32">0</div><div class="label">cases catalogued</div></div>
       <div class="stat"><div class="num" data-counter="17378">0</div><div class="label">candidates surfaced last week</div></div>
@@ -1167,6 +1909,459 @@
 </div>
 
 <script>
+/* ===================== INTRO SCENARIO ===================== */
+window.__startIntroSim = function introScenario(){
+  if (window.__introSimStarted) return;
+  window.__introSimStarted = true;
+  document.documentElement.classList.add('intro-show');
+
+  const sim = document.getElementById('intro-sim');
+  if (!sim) return;
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  const fleetEl   = document.getElementById('intro-fleet');
+  const trailsEl  = document.getElementById('intro-trails');
+  const routesEl  = document.getElementById('intro-routes');
+  const cdNum     = document.getElementById('intro-cd-num');
+  const cdBar     = document.getElementById('intro-cd-bar');
+  const tooltip   = document.getElementById('intro-tooltip');
+  const question  = document.getElementById('intro-question');
+  const reveal    = document.getElementById('intro-reveal');
+  const revealSub = document.getElementById('intro-reveal-sub');
+  const continueBtn = document.getElementById('intro-continue');
+  const skipBtn   = document.getElementById('intro-skip');
+  const frameEl   = document.getElementById('intro-frame');
+  const coordEl   = document.getElementById('intro-coord');
+
+  function el(tag, attrs, parent){
+    const e = document.createElementNS(SVG_NS, tag);
+    if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // ---- Fleet definition. Coords in 1000x700 viewBox.
+  //      Cell formation, in-trail (longitudinal). Heading 260° (WSW) —
+  //      simulating an IRGC weapons-resupply track from Iran/Iraq via
+  //      Syrian airspace toward Lebanon. Mimics Qeshm Fars Air, a US-Treasury
+  //      sanctioned IRGC front airline.
+  //      Spacing: ~5 viewBox units between aircraft along the trail vector,
+  //      which approximates 2 nm at this latitude (1° lon ≈ 48 nm × 1.59 vbu).
+  //      Vertical: 500 ft stacking (FL320 → FL315 → FL310 → FL305).
+  //      Same squawk on all four — real military cell-formation behavior.
+  //      Position deltas over 30 s ≈ 3.7 nm WSW (real 440 kt × 30 s).
+  const fleet = [
+    // Lead (south-most), three trail aircraft stacked behind to the north.
+    // Heading 180° (due south). Each 5 vbu (~2 nm) trail offset = pure north.
+    // 30 s drift: 440 kt × 30 s = 3.67 nm = ~3.55 vbu south.
+    { id:'T1', callsign:'QFZ9951', hex:'73C001', type:'Boeing 747-200F',
+      reg:'EP-FAA', alt:32000, gs:440, sqk:'2341',
+      x0: 807, y0: 422, x1: 807, y1: 425.55, off:-2 },
+    { id:'T2', callsign:'QFZ9952', hex:'73C014', type:'Boeing 747-200F',
+      reg:'EP-FAB', alt:31500, gs:440, sqk:'2341',
+      x0: 807, y0: 417, x1: 807, y1: 420.55, off:0 },
+    { id:'T3', callsign:'QFZ9953', hex:'73C022', type:'Ilyushin Il-76',
+      reg:'EP-FAH', alt:31000, gs:440, sqk:'2341',
+      x0: 807, y0: 412, x1: 807, y1: 415.55, off:2 },
+    { id:'T4', callsign:'QFZ9954', hex:'73C035', type:'Ilyushin Il-76',
+      reg:'EP-FAJ', alt:30500, gs:440, sqk:'2341',
+      x0: 807, y0: 407, x1: 807, y1: 410.55, off:4 },
+  ];
+
+  // ---- Background civilian traffic — the "between regular flights" context.
+  //      Real airline ICAO codes + plausible flight numbers + types for E. Med
+  //      transit routes. Static positions; we animate a slow drift in step().
+  //      [x, y, heading°, callsign, type, FL]
+  const bg = [
+    // NW Turkey / Aegean
+    [ 85,  85, 95,  'TK1923', 'A321', 380],
+    [180, 110,130,  'PGT241', 'B738', 360],
+    [250,  75, 95,  'THY602', 'B77W', 410],
+    [110, 175,100,  'AFR1224','A332', 380],
+    [205, 200,115,  'DLH1430','A320', 350],
+    [305, 145, 80,  'KLM451', 'B789', 390],
+    // Central Anatolia
+    [385, 100,110,  'AFL2502','A320', 370],
+    [445, 175,105,  'BAW133', 'A35K', 410],
+    [520,  95, 90,  'MSR701', 'A320', 360],
+    [385, 220, 95,  'ROU321', 'B737', 350],
+    // Southern Turkey / Med
+    [550, 240,100,  'SXS3024','B738', 370],
+    [635, 175, 95,  'UAE204', 'A388', 390],
+    [475, 285,100,  'QTR50',  'B77W', 400],
+    [730, 200,105,  'SVA208', 'B789', 380],
+    // East of Cyprus
+    [850, 225,135,  'ETH702', 'B789', 390],
+    [895, 305,125,  'AAL237', 'B789', 380],
+    [930, 380,150,  'UAL902', 'B789', 390],
+    // S Levant / N Sinai
+    [380, 485, 80,  'ELY385', 'B789', 380],
+    [515, 560, 95,  'MEA213', 'A321', 350],
+    [625, 595, 75,  'RJA111', 'A319', 330],
+    [820, 625, 80,  'SVA101', 'B772', 390],
+    // N Egypt
+    [305, 555, 75,  'MSR910', 'B738', 320],
+    [195, 615,100,  'TUN751', 'A320', 350],
+    // sliver edges
+    [ 40, 300, 90,  'CYP103', 'A320', 340],
+    [ 60, 430,100,  'AEG612', 'A320', 330],
+    [970, 480,150,  'QTR1241','A388', 410],
+    [955, 545,165,  'EK104',  'B77L', 390],
+    [875, 510,120,  'ETD18',  'B789', 380],
+    // a couple climbing/departing low
+    [690, 270,135,  'CYP301', 'A320', 110],
+    [800, 460, 30,  'MEA315', 'A332', 250]
+  ];
+
+  // ---- Background traffic — rendered as small plane silhouettes
+  //      Top-down plane path, nose at y=-10. Same shape used for tankers,
+  //      different color/scale so the formation stands apart.
+  const PLANE_PATH = 'M 0 -10 L 1.5 -5 L 12 3 L 12 4.5 L 1.5 2 L 1.5 8 L 4.5 11 L 4.5 12 L 0 10.5 L -4.5 12 L -4.5 11 L -1.5 8 L -1.5 2 L -12 4.5 L -12 3 L -1.5 -5 Z';
+
+  // Insert a <g id="intro-bg-traffic"> behind fleet
+  const bgEl = el('g', {id:'intro-bg-traffic', 'aria-hidden':'true'}, null);
+  // Place into SVG before trails group so it renders behind
+  trailsEl.parentNode.insertBefore(bgEl, trailsEl);
+
+  bg.forEach((rec, idx) => {
+    const [x, y, hdg, cs, type, fl] = rec;
+    const onGround = fl < 30; // sub-3000ft = approach/departure — render dimmer
+    const g = el('g', {class:'intro-bg-ac', 'data-cs':cs,
+      transform:'translate('+x+','+y+')'}, bgEl);
+    const rot = el('g', {transform:'rotate('+hdg+') scale(0.62)'}, g);
+    el('path', {d:PLANE_PATH, class: onGround ? 'bg-plane ground' : 'bg-plane'}, rot);
+    // tiny callsign label (only on a subset to avoid clutter)
+    if (idx % 3 === 0 && !onGround) {
+      el('text', {x:11, y:3, class:'bg-cs-lbl'}, g).textContent = cs;
+    }
+  });
+
+  // ---- Build SVG elements per aircraft
+  fleet.forEach((a,i) => {
+    a.dx = a.x1 - a.x0;
+    a.dy = a.y1 - a.y0;
+    a.heading = Math.round((Math.atan2(a.dx, -a.dy) * 180 / Math.PI + 360) % 360);
+
+    // Faint future-route line
+    a.future = el('line', {
+      class:'intro-trail-future',
+      x1:a.x0, y1:a.y0, x2:a.x1, y2:a.y1
+    }, routesEl);
+
+    // Trail polylines (glow + sharp)
+    a.trailGlow = el('polyline', {class:'intro-trail-glow', points:''}, trailsEl);
+    a.trail     = el('polyline', {class:'intro-trail',     points:''}, trailsEl);
+    a.points = [];
+
+    // Aircraft group (positioned by translate, label/icon are static within)
+    a.g = el('g', {class:'intro-ac', 'data-id':a.id, tabindex:'0',
+                   'aria-label':a.callsign + ' ' + a.hex}, fleetEl);
+
+    // Invisible hit target
+    el('circle', {r:22, fill:'transparent', class:'ac-hit'}, a.g);
+
+    // pulses (offset)
+    el('circle', {r:5, class:'ac-pulse'},    a.g);
+    el('circle', {r:5, class:'ac-pulse d1'}, a.g);
+    el('circle', {r:5, class:'ac-pulse d2'}, a.g);
+
+    // halo
+    el('circle', {r:18, class:'ac-halo'}, a.g);
+
+    // rotating icon group — top-down plane silhouette
+    a.iconG = el('g', {class:'ac-icon-rot'}, a.g);
+    el('path', {class:'ac-icon', d: PLANE_PATH}, a.iconG);
+
+    // labels — alternate left/right per aircraft so adjacent labels don't
+    // pile up. Aircraft are stacked vertically 5 vbu apart; placing odd
+    // aircraft labels left and even labels right gives 10 vbu of effective
+    // vertical separation between labels on the same side.
+    const onLeft = (i % 2 === 0);              // T1, T3 on left
+    const lx = onLeft ? -11 : 11;
+    const anchor = onLeft ? 'end' : 'start';
+    a.lbl1 = el('text', {x:lx, y:-3, class:'ac-label', 'text-anchor':anchor}, a.g);
+    a.lbl1.textContent = a.callsign;
+    a.lbl2 = el('text', {x:lx, y:5,  class:'ac-label-sub', 'text-anchor':anchor}, a.g);
+    a.lbl2.textContent = a.hex + '  FL' + Math.round(a.alt/100);
+  });
+
+  // ---- Tooltip
+  function showTooltip(a, evt){
+    tooltip.innerHTML =
+      '<div class="intro-tt-callsign">'+a.callsign+'</div>'+
+      '<div class="intro-tt-type">'+a.type+' · '+a.reg+'</div>'+
+      '<dl class="intro-tt-rows">'+
+        '<dt>ICAO</dt><dd>'+a.hex+'</dd>'+
+        '<dt>ALT</dt><dd>'+a.alt.toLocaleString()+' ft  <span style="color:var(--dim)">· FL'+Math.round(a.alt/100)+'</span></dd>'+
+        '<dt>GS</dt><dd>'+a.gs+' kt</dd>'+
+        '<dt>TRK</dt><dd>'+String(a.heading).padStart(3,'0')+'°</dd>'+
+        '<dt>SQK</dt><dd>'+a.sqk+'  <span style="color:var(--dim)">· non-discrete</span></dd>'+
+        '<dt>SRC</dt><dd>ADS-B  <span style="color:var(--dim)">· no MLAT</span></dd>'+
+      '</dl>';
+    tooltip.classList.add('show');
+    a.g.classList.add('hover');
+    moveTooltip(evt);
+  }
+  function moveTooltip(evt){
+    const r = sim.getBoundingClientRect();
+    const px = (evt.clientX !== undefined) ? evt.clientX : (evt.touches && evt.touches[0] && evt.touches[0].clientX) || 0;
+    const py = (evt.clientY !== undefined) ? evt.clientY : (evt.touches && evt.touches[0] && evt.touches[0].clientY) || 0;
+    let x = px - r.left + 22;
+    let y = py - r.top + 22;
+    const tr = tooltip.getBoundingClientRect();
+    if (x + tr.width  > r.width  - 16) x = (px - r.left) - tr.width - 22;
+    if (y + tr.height > r.height - 16) y = (py - r.top)  - tr.height - 22;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  }
+  function hideTooltip(a){
+    tooltip.classList.remove('show');
+    if (a) a.g.classList.remove('hover');
+  }
+  fleet.forEach(a => {
+    a.g.addEventListener('pointerenter', e => showTooltip(a, e));
+    a.g.addEventListener('pointermove',  e => moveTooltip(e));
+    a.g.addEventListener('pointerleave', () => hideTooltip(a));
+    a.g.addEventListener('focus', e => {
+      const r = a.g.getBoundingClientRect();
+      showTooltip(a, {clientX:r.left+r.width/2, clientY:r.top});
+    });
+    a.g.addEventListener('blur', () => hideTooltip(a));
+  });
+
+  // ---- Animation
+  const DUR_MS = 30000;
+  // Zoom-in choreography (seconds into runtime)
+  const ZOOM_HOLD_S  = 3.4;   // wide view, scanning busy traffic
+  const ZOOM_DUR_S   = 2.2;   // duration of the zoom transition
+  const VB_WIDE  = [0, 0, 1000, 700];
+  const VB_TIGHT = [697, 338, 220, 154]; // centered on the cell formation above Lebanon
+  const svgMap = document.querySelector('.intro-map');
+
+  // Easing for camera move
+  function easeInOutCubic(p){ return p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2, 3)/2; }
+
+  function applyViewBox(vb){
+    svgMap.setAttribute('viewBox', vb[0].toFixed(1)+' '+vb[1].toFixed(1)+' '+vb[2].toFixed(1)+' '+vb[3].toFixed(1));
+  }
+
+  const t0 = performance.now();
+  let rafId = 0;
+  let dismissed = false;
+  let answered  = false;
+  let frame = 0;
+  let questionShown = false;
+
+  function step(now){
+    if (dismissed) return;
+    frame++;
+    const elapsed = now - t0;
+    const t = Math.min(elapsed / DUR_MS, 1);
+    const elapsedSec = elapsed / 1000;
+
+    // ----- camera (viewBox interpolation)
+    let currentVbW;
+    if (elapsedSec <= ZOOM_HOLD_S) {
+      applyViewBox(VB_WIDE);
+      currentVbW = VB_WIDE[2];
+    } else if (elapsedSec >= ZOOM_HOLD_S + ZOOM_DUR_S) {
+      applyViewBox(VB_TIGHT);
+      currentVbW = VB_TIGHT[2];
+      if (!questionShown) { questionShown = true; question.classList.add('show'); }
+    } else {
+      const p = (elapsedSec - ZOOM_HOLD_S) / ZOOM_DUR_S;
+      const e = easeInOutCubic(p);
+      const vb = [
+        VB_WIDE[0] + (VB_TIGHT[0] - VB_WIDE[0]) * e,
+        VB_WIDE[1] + (VB_TIGHT[1] - VB_WIDE[1]) * e,
+        VB_WIDE[2] + (VB_TIGHT[2] - VB_WIDE[2]) * e,
+        VB_WIDE[3] + (VB_TIGHT[3] - VB_WIDE[3]) * e,
+      ];
+      applyViewBox(vb);
+      currentVbW = vb[2];
+    }
+
+    // Keep all text at constant CSS pixel size by inverse-scaling font-size.
+    // All city/grat/bg/aircraft labels handled the same way (inline style).
+    // Country watermarks fade out at higher zoom (decorative giants).
+    // Aircraft labels themselves fade IN as the camera zooms (FR24-style).
+    const lblScale = currentVbW / VB_WIDE[2];
+    if (!step._initFs) {
+      step._initFs = true;
+      step._scalableTexts = [];
+      document.querySelectorAll(
+        '.intro-cities text, .intro-grat text, .bg-cs-lbl, .ac-label, .ac-label-sub'
+      ).forEach(t => {
+        const inline = t.getAttribute('font-size');
+        const base = inline ? parseFloat(inline) : parseFloat(getComputedStyle(t).fontSize);
+        if (!isNaN(base) && base > 0) {
+          t._baseFs = base;
+          step._scalableTexts.push(t);
+        }
+      });
+      step._fadeTexts = Array.from(document.querySelectorAll('.intro-sea-label'));
+      step._acLabels  = Array.from(document.querySelectorAll('.ac-label, .ac-label-sub'));
+    }
+    if (frame % 2 === 1) {
+      step._scalableTexts.forEach(t => {
+        t.style.fontSize = (t._baseFs * lblScale).toFixed(2) + 'px';
+      });
+      // Country/sea watermarks: fade out above 50% zoom
+      const fadeWM = Math.max(0, Math.min(1, (currentVbW - 380) / 320));
+      step._fadeTexts.forEach(t => t.style.opacity = fadeWM.toFixed(2));
+      // Aircraft labels: fade IN as zoom progresses
+      // 0 at vbw>=800, 1 at vbw<=300, lerp between
+      const fadeAc = Math.max(0, Math.min(1, (800 - currentVbW) / 500));
+      const acOp = fadeAc.toFixed(2);
+      step._acLabels.forEach(t => t.style.opacity = acOp);
+    }
+
+    // ----- background civilian traffic: very slow drift along heading
+    //       (only update every few frames to save work)
+    if (frame % 6 === 0) {
+      const bgGroups = bgEl.children;
+      for (let i = 0; i < bgGroups.length; i++) {
+        const rec = bg[i];
+        if (!rec) continue;
+        const drift = elapsedSec * 0.45; // ~13px over 30s
+        const rad = rec[2] * Math.PI / 180;
+        const ddx = Math.sin(rad) * drift;
+        const ddy = -Math.cos(rad) * drift;
+        bgGroups[i].setAttribute('transform',
+          'translate(' + (rec[0] + ddx).toFixed(2) + ',' + (rec[1] + ddy).toFixed(2) + ')');
+      }
+    }
+
+    // ----- tankers: barely-perceptible drift along refueling track
+    fleet.forEach(a => {
+      const wobble = Math.sin((now/900) + a.off) * 0.4;
+      const x = a.x0 + a.dx * t + wobble;
+      const y = a.y0 + a.dy * t;
+      a.g.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ')');
+      a.iconG.setAttribute('transform', 'rotate(' + a.heading + ') scale(0.7)');
+      // trail accumulates every 3 frames
+      if (frame % 3 === 0) {
+        a.points.push(x.toFixed(2) + ',' + y.toFixed(2));
+        const pts = a.points.join(' ');
+        a.trail.setAttribute('points', pts);
+        a.trailGlow.setAttribute('points', pts);
+      }
+    });
+
+    // countdown
+    const remaining = 30 - t * 30;
+    cdNum.textContent = remaining.toFixed(2);
+    const warn = remaining <= 20 && remaining > 10;
+    const dang = remaining <= 10;
+    cdNum.classList.toggle('warn', warn);
+    cdNum.classList.toggle('danger', dang);
+    if (cdBar) {
+      cdBar.style.transform = 'scaleX(' + (1 - t) + ')';
+      cdBar.style.background = dang
+        ? 'linear-gradient(90deg, var(--danger), var(--danger))'
+        : warn
+        ? 'linear-gradient(90deg, var(--warn), var(--warn))'
+        : 'linear-gradient(90deg, var(--accent), var(--accent))';
+    }
+
+    // chrome readouts
+    if (frame % 2 === 0) {
+      frameEl.textContent = 'FRAME ' + String(Math.floor(elapsed * 0.06) + 1).padStart(4,'0');
+      // lead aircraft coord readout
+      const lead = fleet[0];
+      const lon = 25 + (lead.x0 + lead.dx * t) / 76.92;
+      const lat = 42 - (lead.y0 + lead.dy * t) / 58.33;
+      const latD = Math.floor(lat), latM = Math.round((lat - latD) * 60);
+      const lonD = Math.floor(lon), lonM = Math.round((lon - lonD) * 60);
+      coordEl.textContent =
+        'N ' + latD + '° ' + String(latM).padStart(2,'0') + "'  " +
+        'E ' + lonD + '° ' + String(lonM).padStart(2,'0') + "'";
+    }
+
+    if (t < 1) {
+      rafId = requestAnimationFrame(step);
+    } else {
+      cdNum.textContent = '0.00';
+      if (!answered) setTimeout(() => showReveal(null), 700);
+    }
+  }
+
+  // Question is shown by the step() loop after the zoom completes
+  rafId = requestAnimationFrame(step);
+
+  // ---- Answer + reveal
+  function showReveal(answer){
+    if (answered) return;
+    answered = true;
+    cancelAnimationFrame(rafId);
+    hideTooltip();
+    // tailor subhead per answer (both arrive at the same "you can't tell")
+    if (revealSub && answer === 'attack') {
+      revealSub.innerHTML =
+        'Maybe. Qeshm Fars is on every US-Treasury weapons-resupply list — an attacker with that knowledge uses it as cover. ' +
+        '<strong>Real IRGC cell or four lines a <code>$300 SDR</code> drew, mimicking a weapons run — from this data, indistinguishable.</strong>';
+    } else if (revealSub && answer === 'fake') {
+      revealSub.innerHTML =
+        'Maybe. But a genuine IRGC-front cargo cell broadcasts a track that looks <em>exactly</em> like this — ' +
+        'in-trail at 2 nm, stacked 500 ft, same squawk on every airframe. <strong>You called it on instinct, not on evidence.</strong>';
+    }
+    reveal.classList.add('show');
+    reveal.setAttribute('aria-hidden','false');
+    setTimeout(() => { try{ continueBtn.focus({preventScroll:true}); }catch(e){} }, 220);
+  }
+
+  document.querySelectorAll('.intro-btn').forEach(btn => {
+    btn.addEventListener('click', () => showReveal(btn.dataset.answer));
+  });
+
+  function dismiss(){
+    if (dismissed) return;
+    dismissed = true;
+    cancelAnimationFrame(rafId);
+    sim.classList.add('dismissed');
+    try { localStorage.setItem('tracer-intro-seen','1'); } catch(e){}
+    setTimeout(() => {
+      document.documentElement.classList.remove('intro-show');
+      if (sim.parentNode) sim.parentNode.removeChild(sim);
+      window.scrollTo({top:0, behavior:'auto'});
+    }, 620);
+  }
+
+  continueBtn.addEventListener('click', dismiss);
+  skipBtn.addEventListener('click', dismiss);
+
+  document.addEventListener('keydown', e => {
+    if (dismissed) return;
+    if (e.key === 'Escape') { e.preventDefault(); dismiss(); return; }
+    if (reveal.classList.contains('show')) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dismiss(); }
+      return;
+    }
+    if (e.key === 'a' || e.key === 'A' || e.key === '1') {
+      e.preventDefault();
+      document.querySelector('.intro-btn[data-answer="attack"]').click();
+    } else if (e.key === 'b' || e.key === 'B' || e.key === '2') {
+      e.preventDefault();
+      document.querySelector('.intro-btn[data-answer="fake"]').click();
+    }
+  });
+};
+
+(function wireSimTrigger(){
+  function start(e){
+    if (e) e.preventDefault();
+    if (typeof window.__startIntroSim === 'function') window.__startIntroSim();
+  }
+  const btn = document.getElementById('run-sim-btn');
+  if (btn) btn.addEventListener('click', start);
+  const link = document.getElementById('run-sim-link');
+  if (link) link.addEventListener('click', start);
+})();
+
 (function(){
   const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
   const coarse  = matchMedia('(pointer:coarse)').matches;
