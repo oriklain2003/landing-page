@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import WaitlistForm from './WaitlistForm';
+import TracerDispatch from './TracerDispatch';
 
 const WORDS = ["control", "autonomy", "airspace", "prediction", "detection", "intelligence"];
 
@@ -59,8 +60,11 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} className="relative max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-between min-h-screen overflow-hidden">
-      
+    <div ref={containerRef} className="relative w-full">
+
+      {/* Hero fold */}
+      <div className="relative max-w-7xl mx-auto px-6 py-12 flex flex-col items-center min-h-screen">
+
       {/* Header */}
       <header className="w-full relative flex items-center justify-center py-8 z-10">
         <motion.div 
@@ -95,7 +99,7 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
       </header>
 
       {/* Hero Body */}
-      <main className="relative z-10 flex-grow flex flex-col items-center justify-center text-center max-w-4xl space-y-12">
+      <main className="relative z-10 flex-grow flex flex-col items-center justify-center text-center max-w-4xl space-y-12 mx-auto">
         <div className="space-y-8">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -126,10 +130,32 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
         >
           <WaitlistForm />
         </motion.div>
+
+        <motion.a
+          href="#dispatch"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
+          className="group flex flex-col items-center gap-2.5 pt-6 text-white/30 hover:text-cyan-300/80 transition-colors duration-500"
+        >
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase">
+            First Dispatch · Tracer Cyber
+          </span>
+          <motion.span
+            className="block w-px h-7 bg-gradient-to-b from-white/30 to-transparent group-hover:from-cyan-400/80"
+            animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ transformOrigin: 'top' }}
+          />
+        </motion.a>
       </main>
+      </div>
+
+      {/* Tracer Cyber product dispatch */}
+      <TracerDispatch />
 
       {/* Footer */}
-      <footer className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-6 py-8 border-t border-white/5">
+      <footer className="relative z-10 max-w-7xl mx-auto w-full px-6 flex flex-col md:flex-row items-center justify-between gap-6 py-8 border-t border-white/5">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

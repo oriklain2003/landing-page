@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tracer Cyber — Onyx Smart Technologies</title>
+<style>
+  :root{
+    --bg:#050608;
+    --bg-2:#0a0b0f;
+    --panel:#0c0e13;
+    --panel-2:#10131a;
+    --line:rgba(255,255,255,.06);
+    --line-strong:rgba(255,255,255,.12);
+    --text:#eef2f7;
+    --muted:#8a93a6;
+    --dim:#525a6e;
+    --accent:#5eead4;
+    --accent-soft:rgba(94,234,212,.12);
+    --warn:#fbbf24;
+    --danger:#ef4444;
+    --mono:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;padding:0;background:var(--bg)}
+  body{
+    font-family:var(--sans);color:var(--text);line-height:1.6;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 100% 80% at 50% 0%, transparent 40%, rgba(0,0,0,.6) 100%);
+  }
+  ::selection{background:var(--accent);color:var(--bg)}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:#1a1f2e;border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:#252b40}
+
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;transition:.25s var(--ease)}
+  a:hover{border-bottom-color:var(--accent)}
+
+  .scroll-prog{
+    position:fixed;top:0;left:0;height:2px;width:0;
+    background:linear-gradient(90deg,transparent,var(--accent));
+    z-index:100;transition:width .1s linear;pointer-events:none;
+  }
+
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(140%) blur(14px);
+    -webkit-backdrop-filter:saturate(140%) blur(14px);
+    background:rgba(5,6,8,.72);
+    border-bottom:1px solid var(--line);
+  }
+  header.nav .row{
+    max-width:1200px;margin:0 auto;padding:16px 32px;
+    display:flex;justify-content:space-between;align-items:center;gap:24px;
+  }
+  .brand{display:flex;align-items:center;gap:20px;color:var(--text)}
+  .brand img{
+    height:88px;width:auto;
+    filter:invert(1) brightness(1.05) contrast(1) drop-shadow(0 0 22px rgba(94,234,212,.22));
+    transition:filter .45s var(--ease), transform .45s var(--ease);
+  }
+  .brand:hover img{filter:invert(1) brightness(1.05) contrast(1) drop-shadow(0 0 32px rgba(94,234,212,.48));transform:translateZ(0) scale(1.03)}
+  .brand .div{height:44px;width:1px;background:var(--line-strong)}
+  .brand .label{
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    letter-spacing:.14em;text-transform:uppercase;
+  }
+  .brand .label b{color:var(--text);font-weight:500}
+  header.nav .nav-links{display:flex;gap:28px;font-size:13.5px}
+  header.nav .nav-links a{color:var(--muted);border-bottom:none}
+  header.nav .nav-links a:hover{color:var(--text)}
+  @media (max-width:720px){header.nav .nav-links{display:none}}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+  section{padding:128px 0;position:relative}
+  section + section{border-top:1px solid var(--line)}
+
+  .reveal{
+    opacity:0;transform:translateY(28px);
+    transition:opacity .9s var(--ease),transform .9s var(--ease);
+    will-change:opacity,transform;
+  }
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.06s}
+  .reveal.d2{transition-delay:.14s}
+  .reveal.d3{transition-delay:.22s}
+  .reveal.d4{transition-delay:.30s}
+  @media (prefers-reduced-motion:reduce){
+    .reveal,.reveal.in,.reveal.d1,.reveal.d2,.reveal.d3,.reveal.d4{
+      opacity:1;transform:none;transition:none}
+    .radar .sweep,.dot,.scroll-arrow,.lb-bg{animation:none}
+  }
+
+  /* HERO */
+  .hero{padding:120px 0 140px;position:relative;overflow:hidden}
+  .hero .badge{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:7px 14px;border:1px solid var(--line-strong);border-radius:999px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);background:rgba(255,255,255,.02);backdrop-filter:blur(8px);
+  }
+  .hero .badge .dot{
+    width:5px;height:5px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px var(--accent);animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  h1{font-size:clamp(40px,6.4vw,84px);line-height:1.02;letter-spacing:-.025em;margin:28px 0;font-weight:600}
+  h1 .grad{
+    background:linear-gradient(135deg,#5eead4 0%,#38bdf8 55%,#a78bfa 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .lede{font-size:clamp(16.5px,1.55vw,20px);color:var(--muted);max-width:720px;margin:0 0 48px;line-height:1.65}
+  .lede strong{color:var(--text);font-weight:500}
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;margin-top:48px;
+  }
+  .stat{padding:24px 26px;background:var(--panel)}
+  .stat .num{
+    font-family:var(--mono);font-size:34px;font-weight:500;
+    color:var(--text);letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums;
+  }
+  .stat .label{color:var(--muted);font-size:11.5px;margin-top:10px;font-family:var(--mono);letter-spacing:.05em}
+  .scroll-arrow{
+    position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--dim);
+    text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;
+  }
+  .scroll-arrow::after{
+    content:"";width:1px;height:32px;background:linear-gradient(to bottom,var(--dim),transparent);
+    animation:drop 2.4s ease-in-out infinite;
+  }
+  @keyframes drop{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(8px);opacity:.9}}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:18px;display:inline-flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:24px;height:1px;background:var(--accent);opacity:.5}
+  h2{font-size:clamp(30px,3.8vw,52px);line-height:1.08;letter-spacing:-.025em;margin:0 0 20px;font-weight:600}
+  h2 + p.kicker{color:var(--muted);font-size:18px;max-width:680px;margin:0 0 64px;line-height:1.55}
+  h3{font-size:20px;line-height:1.3;letter-spacing:-.01em;margin:0 0 14px;font-weight:600}
+
+  .problem-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:56px;align-items:start}
+  .problem-grid p{color:var(--muted);font-size:15.5px;margin:0 0 18px}
+  .problem-grid p:last-child{margin:0}
+  .problem-grid p strong{color:var(--text);font-weight:500}
+  .specs{
+    border:1px solid var(--line);border-radius:14px;padding:28px 30px;background:var(--panel);
+    font-family:var(--mono);font-size:12.5px;line-height:2.1;
+  }
+  .specs .k{color:var(--accent);width:130px;display:inline-block;font-weight:500}
+  .specs .v{color:var(--muted)}
+
+  .attack-types{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:24px}
+  .attack{
+    border:1px solid var(--line);border-radius:14px;padding:30px;background:var(--panel);
+    position:relative;overflow:hidden;transition:.4s var(--ease);
+  }
+  .attack:hover{transform:translateY(-3px);border-color:var(--line-strong);background:var(--panel-2)}
+  .attack::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent) 50%,transparent);opacity:.6;
+  }
+  .attack[data-class="diversion"]::before{background:linear-gradient(90deg,transparent,var(--warn) 50%,transparent)}
+  .attack[data-class="replay"]::before{background:linear-gradient(90deg,transparent,var(--danger) 50%,transparent)}
+  .attack .tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .attack h3{font-weight:500}
+  .attack p{color:var(--muted);font-size:14.5px;margin:0}
+  .attack .example{
+    margin-top:18px;padding-top:18px;border-top:1px dashed var(--line);
+    font-size:13px;color:var(--dim);
+  }
+  .attack .example b{color:var(--text);font-weight:500}
+
+  /* CASE CARDS */
+  .cases-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+  .case{
+    border:1px solid var(--line);border-radius:14px;padding:30px;background:var(--panel);
+    position:relative;transition:.4s var(--ease);cursor:pointer;
+  }
+  .case:hover{border-color:var(--accent);background:var(--panel-2);transform:translateY(-2px)}
+  .case:hover .case-view{opacity:1;transform:translate(0,0)}
+  .case:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .case .head{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px;
+  }
+  .case .name{font-size:18.5px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+  .case .meta{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.02em;text-align:right;flex-shrink:0}
+  .case .meta .badge-mini{
+    display:inline-block;padding:3px 8px;border-radius:4px;
+    background:var(--accent-soft);color:var(--accent);
+    font-size:9.5px;letter-spacing:.1em;margin-bottom:6px;font-weight:500;
+  }
+  .case .meta .badge-mini.warn{background:rgba(251,191,36,.1);color:var(--warn)}
+  .case .meta .badge-mini.danger{background:rgba(239,68,68,.1);color:var(--danger)}
+  .case p{color:var(--muted);font-size:14px;margin:0 0 12px;line-height:1.6}
+  .case .facts{
+    display:flex;flex-wrap:wrap;gap:8px 16px;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+    padding-top:14px;border-top:1px solid var(--line);margin-top:14px;
+  }
+  .case .facts span{color:var(--accent)}
+  .case .case-view{
+    position:absolute;bottom:14px;right:18px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--accent);
+    text-transform:uppercase;display:flex;align-items:center;gap:6px;
+    opacity:0;transform:translate(-4px,4px);transition:.4s var(--ease);
+  }
+  .case .case-view svg{width:12px;height:12px}
+
+  .cases-grid.compact{grid-template-columns:repeat(2,1fr);gap:14px}
+  .cases-grid.compact .case{padding:24px}
+  .cases-grid.compact .case .name{font-size:16px}
+  .cases-grid.compact .case p{font-size:13.5px}
+
+  /* DANGER */
+  .danger-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+  .danger-card{
+    border:1px solid var(--line);border-radius:14px;padding:30px;background:var(--panel);
+    border-left:2px solid var(--danger);transition:.4s var(--ease);
+  }
+  .danger-card:hover{border-left-color:var(--accent);background:var(--panel-2)}
+  .danger-card h3{font-size:17px;margin-bottom:10px}
+  .danger-card p{color:var(--muted);font-size:14px;margin:0;line-height:1.6}
+
+  /* APPROACH */
+  .approach-intro{
+    border:1px solid var(--line);border-radius:14px;padding:36px 40px;background:var(--panel);
+    margin-bottom:32px;font-size:16px;color:var(--muted);
+  }
+  .approach-intro strong{color:var(--text);font-weight:500}
+  .approach-intro .pull{
+    display:block;margin-top:20px;font-size:22px;line-height:1.4;
+    color:var(--text);font-weight:500;letter-spacing:-.015em;
+  }
+  .axes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
+  .axis{
+    border:1px solid var(--line);border-radius:14px;padding:26px;background:var(--panel);
+    display:flex;gap:20px;align-items:flex-start;transition:.4s var(--ease);
+  }
+  .axis:hover{border-color:var(--line-strong);background:var(--panel-2)}
+  .axis .num{
+    font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;
+    width:44px;height:44px;border-radius:11px;background:var(--accent-soft);
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .axis h4{margin:0 0 8px;font-size:16px;font-weight:600;letter-spacing:-.005em}
+  .axis p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+  .axis p.cost{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.02em;line-height:1.5}
+  .axis p.cost b{color:var(--warn);font-weight:500}
+
+  .math{border:1px solid var(--line);border-radius:14px;padding:40px;background:var(--panel);margin-top:36px}
+  .math h3{font-size:22px;margin-bottom:14px;letter-spacing:-.015em}
+  .math .eq{
+    font-family:var(--mono);font-size:13.5px;
+    background:var(--bg-2);padding:22px 26px;border-radius:10px;
+    color:var(--accent);line-height:1.9;margin:20px 0;
+    border:1px solid var(--line);overflow-x:auto;
+  }
+  .math p{color:var(--muted);font-size:14.5px;line-height:1.65}
+
+  footer{
+    padding:80px 0 100px;border-top:1px solid var(--line);
+    color:var(--dim);font-size:13px;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.4));
+  }
+  footer .row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap}
+  footer .brand-block img{
+    height:84px;filter:invert(1) brightness(1) drop-shadow(0 0 24px rgba(94,234,212,.18));
+    margin-bottom:18px;
+  }
+  footer .links{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px}
+  footer .links a{color:var(--muted);font-size:13px;border-bottom:none}
+  footer .links a:hover{color:var(--text)}
+  footer .meta{font-size:11.5px;color:var(--dim);font-family:var(--mono);letter-spacing:.04em;max-width:340px;text-align:right;line-height:1.7}
+  footer code{font-family:var(--mono);color:var(--muted);background:var(--panel);padding:2px 6px;border-radius:4px;font-size:12px}
+
+  /* radar */
+  .radar{position:absolute;top:50%;right:40px;transform:translateY(-50%);width:340px;height:340px;opacity:.85;pointer-events:none;z-index:1}
+  @media (max-width:1100px){.radar{display:none}}
+  .radar circle.ring{fill:none;stroke:rgba(94,234,212,.34);stroke-width:1}
+  .radar circle.ring-faint{fill:none;stroke:rgba(94,234,212,.14);stroke-width:1;stroke-dasharray:2 5}
+  .radar line.tick{stroke:rgba(94,234,212,.5);stroke-width:1.4;stroke-linecap:round}
+  .radar circle.center{fill:rgba(94,234,212,.9)}
+  .radar circle.center-pulse{fill:none;stroke:rgba(94,234,212,.5);stroke-width:1;transform-origin:170px 170px;animation:centerPulse 3.2s ease-out infinite}
+  @keyframes centerPulse{
+    0%{r:3;opacity:.7}
+    100%{r:34;opacity:0}
+  }
+  .radar .sweep{transform-origin:170px 170px;animation:rot 8s linear infinite}
+  @keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .radar circle.blip{fill:var(--accent);filter:drop-shadow(0 0 6px rgba(94,234,212,.7));animation:blinkA 4s ease-in-out infinite}
+  .radar circle.blip.b{animation-delay:1s;animation-duration:5s}
+  .radar circle.blip.c{animation-delay:2s;animation-duration:6s}
+  .radar circle.blip.d{fill:var(--danger);filter:drop-shadow(0 0 6px rgba(239,68,68,.7));animation:blinkB 3.4s ease-in-out infinite;animation-delay:.5s}
+  @keyframes blinkA{0%,100%{opacity:0}40%,60%{opacity:1}}
+  @keyframes blinkB{0%,100%{opacity:0}50%{opacity:1}}
+
+  /* ============ LIGHTBOX ============ */
+  .lb{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(2,3,5,.85);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    display:flex;align-items:center;justify-content:center;
+    padding:40px;
+    opacity:0;visibility:hidden;
+    transition:.4s var(--ease);
+  }
+  .lb.open{opacity:1;visibility:visible}
+  .lb-inner{
+    max-width:1100px;width:100%;max-height:90vh;
+    display:grid;grid-template-columns:1.4fr 1fr;gap:32px;
+    border:1px solid var(--line-strong);border-radius:16px;
+    background:var(--panel);
+    overflow:hidden;
+    transform:translateY(20px) scale(.98);
+    transition:.5s var(--ease);
+  }
+  .lb.open .lb-inner{transform:translateY(0) scale(1)}
+  .lb-bg{
+    position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 30% 30% at 80% 20%, rgba(94,234,212,.04), transparent 70%),
+      radial-gradient(ellipse 30% 30% at 20% 80%, rgba(239,68,68,.03), transparent 70%);
+  }
+  .lb-img-wrap{
+    position:relative;background:#000;
+    display:flex;align-items:center;justify-content:center;
+    min-height:400px;
+    border-right:1px solid var(--line);
+  }
+  .lb-img-wrap img{max-width:100%;max-height:84vh;display:block;object-fit:contain}
+  .lb-img-wrap svg{max-width:100%;max-height:80vh;width:100%;height:auto}
+  .lb-info{padding:36px 38px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:90vh}
+  .lb-info .lb-class{
+    font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .lb-info h3{font-size:24px;line-height:1.2;margin:0;font-weight:600;letter-spacing:-.015em}
+  .lb-info .lb-meta{font-family:var(--mono);font-size:12px;color:var(--dim)}
+  .lb-info .lb-body{color:var(--muted);font-size:15px;line-height:1.65;margin-top:6px}
+  .lb-info .lb-body b{color:var(--text);font-weight:500}
+  .lb-info .lb-facts{
+    margin-top:auto;padding-top:18px;border-top:1px solid var(--line);
+    display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+  }
+  .lb-info .lb-facts .v{color:var(--accent)}
+  .lb-close{
+    position:absolute;top:18px;right:18px;
+    width:36px;height:36px;border-radius:50%;
+    border:1px solid var(--line-strong);background:rgba(0,0,0,.5);
+    color:var(--text);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:.25s var(--ease);
+    backdrop-filter:blur(8px);
+  }
+  .lb-close:hover{border-color:var(--accent);color:var(--accent)}
+  .lb-close svg{width:16px;height:16px}
+  @media (max-width:880px){
+    .lb{padding:0}
+    .lb-inner{grid-template-columns:1fr;max-height:100vh;border-radius:0;height:100vh}
+    .lb-img-wrap{min-height:300px;max-height:45vh}
+    .lb-info{padding:24px 24px 32px}
+    .lb-info .lb-facts{grid-template-columns:1fr}
+  }
+
+  /* trajectory SVG common */
+  .traj-svg{background:#000}
+  .traj-svg .grid line{stroke:rgba(94,234,212,.08);stroke-width:.5}
+  .traj-svg .ax{stroke:rgba(255,255,255,.15);stroke-width:1}
+  .traj-svg .real-line{stroke:var(--accent);stroke-width:2;fill:none}
+  .traj-svg .fake-line{stroke:var(--danger);stroke-width:2;fill:none;stroke-dasharray:0}
+  .traj-svg .ghost{stroke:var(--danger);stroke-width:2;stroke-dasharray:6 4;fill:none}
+  .traj-svg .dot-real{fill:var(--accent);stroke:none}
+  .traj-svg .dot-fake{fill:var(--danger);stroke:none}
+  .traj-svg .lbl{
+    fill:var(--muted);font-family:var(--mono);font-size:11px;
+  }
+  .traj-svg .lbl-acc{fill:var(--accent);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+  .traj-svg .lbl-warn{fill:var(--warn);font-family:var(--mono);font-size:11px}
+  .traj-svg .title{
+    fill:var(--text);font-family:var(--sans);font-size:16px;font-weight:500;
+  }
+  .traj-svg .sub{
+    fill:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  }
+
+  @media (max-width:900px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .problem-grid{grid-template-columns:1fr;gap:32px}
+    .attack-types{grid-template-columns:1fr}
+    .cases-grid,.cases-grid.compact,.danger-grid,.axes{grid-template-columns:1fr}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 20px}
+    section{padding:80px 0}
+    .hero{padding:60px 0 80px}
+    .stats{grid-template-columns:1fr}
+    .stat{padding:20px 22px}
+    header.nav .row{padding:12px 20px}
+    .brand img{height:56px}
+    footer .brand-block img{height:72px}
+    .approach-intro{padding:28px 24px}
+    .math{padding:28px 24px}
+    footer .row{flex-direction:column;align-items:flex-start}
+    footer .meta{text-align:left}
+  }
+
+  /* ============ CRAFT UPGRADES ============ */
+
+  /* Custom cursor (desktop only) */
+  .cursor-dot,.cursor-ring{
+    position:fixed;top:0;left:0;pointer-events:none;z-index:9999;
+    border-radius:50%;will-change:transform;
+  }
+  .cursor-dot{
+    width:6px;height:6px;background:var(--accent);
+    margin:-3px 0 0 -3px;mix-blend-mode:difference;
+    transform:translate3d(-100px,-100px,0);
+  }
+  .cursor-ring{
+    width:34px;height:34px;border:1px solid rgba(94,234,212,.55);
+    margin:-17px 0 0 -17px;
+    transform:translate3d(-100px,-100px,0);
+    transition:width .25s var(--ease), height .25s var(--ease),
+               margin .25s var(--ease), border-color .25s var(--ease),
+               background-color .25s var(--ease);
+  }
+  .cursor-ring.over{
+    width:60px;height:60px;margin:-30px 0 0 -30px;
+    border-color:var(--accent);background:rgba(94,234,212,.06);
+  }
+  @media (hover:none),(pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
+  @media (prefers-reduced-motion:reduce){.cursor-dot,.cursor-ring{display:none}}
+
+  /* Hero ambient glow (static corners) */
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 55% 45% at 78% 18%, rgba(94,234,212,.08), transparent 65%),
+      radial-gradient(ellipse 38% 30% at 12% 35%, rgba(239,68,68,.03), transparent 65%),
+      radial-gradient(ellipse 50% 40% at 50% 92%, rgba(94,234,212,.04), transparent 70%);
+  }
+  /* Hero cursor-following spotlight (first section only) */
+  .hero-spot{
+    position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(540px 540px at var(--mx,50%) var(--my,30%),
+        rgba(94,234,212,.16), rgba(94,234,212,.05) 38%, transparent 68%),
+      radial-gradient(190px 190px at var(--mx,50%) var(--my,30%),
+        rgba(94,234,212,.30), rgba(94,234,212,.08) 50%, transparent 78%);
+    mix-blend-mode:screen;
+    will-change:background;
+  }
+  @media (hover:none),(pointer:coarse){.hero-spot{display:none}}
+  @media (prefers-reduced-motion:reduce){.hero-spot{display:none}}
+  .hero-grid{
+    position:absolute;inset:-120px;pointer-events:none;z-index:0;opacity:.55;
+    background:
+      linear-gradient(rgba(94,234,212,.045) 1px, transparent 1px) 0 0 / 64px 64px,
+      linear-gradient(90deg, rgba(94,234,212,.045) 1px, transparent 1px) 0 0 / 64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 85%);
+            mask-image:radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 85%);
+    animation:gridDrift 28s linear infinite;
+  }
+  @keyframes gridDrift{
+    from{transform:translate3d(0,0,0)}
+    to{transform:translate3d(64px,64px,0)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero-grid{animation:none}
+  }
+
+  /* H1 letter cascade */
+  h1 .ltr{
+    display:inline-block;opacity:0;transform:translateY(.55em);
+    animation:ltrIn .9s var(--ease) forwards;
+  }
+  h1 .ltr.sp{width:.25em}
+  @keyframes ltrIn{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){h1 .ltr{opacity:1;transform:none;animation:none}}
+
+  /* Eyebrow underline draws in */
+  .eyebrow::before{transform-origin:left center;transform:scaleX(0);transition:transform .9s var(--ease) .1s}
+  .eyebrow.in::before{transform:scaleX(1)}
+
+  /* Card mouse-position glow (cases, attacks, danger, axis) */
+  .case,.attack,.danger-card,.axis{--mx:50%;--my:50%}
+  .case::after,.attack::after,.danger-card::after,.axis::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(320px 240px at var(--mx) var(--my),
+      rgba(94,234,212,.13), transparent 60%);
+    opacity:0;transition:opacity .35s var(--ease);
+  }
+  .case:hover::after,.attack:hover::after,.danger-card:hover::after,.axis:hover::after{opacity:1}
+
+  /* Stat number flashes when scrambled */
+  .stat .num{transition:color .5s var(--ease), text-shadow .5s var(--ease)}
+  .stat .num.flash{color:var(--accent);text-shadow:0 0 18px rgba(94,234,212,.4)}
+
+  /* Live monitoring chip */
+  .live-chip{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 10px 6px 12px;border:1px solid var(--line-strong);border-radius:999px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);background:rgba(255,255,255,.02);backdrop-filter:blur(6px);
+    margin-left:10px;
+  }
+  .live-chip .blip{
+    width:6px;height:6px;border-radius:50%;background:var(--danger);
+    box-shadow:0 0 12px var(--danger);animation:blipPulse 1.6s ease-in-out infinite;
+  }
+  .live-chip .now{color:var(--text);font-weight:500;letter-spacing:.06em}
+  .live-chip .now.swap{opacity:0;transform:translateY(-3px)}
+  .live-chip .now{transition:opacity .25s var(--ease), transform .25s var(--ease)}
+  @keyframes blipPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  .badge-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+  /* Radar outer breathing glow */
+  .radar{filter:drop-shadow(0 0 60px rgba(94,234,212,.18))}
+  .radar::after{}
+
+  /* Subtle text-shimmer on h1 .grad on first paint */
+  h1 .grad{
+    background-size:200% 100%;
+    animation:gradShimmer 14s var(--ease) infinite;
+  }
+  @keyframes gradShimmer{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+  }
+  @media (prefers-reduced-motion:reduce){h1 .grad{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+<div class="scroll-prog" id="scroll-prog"></div>
+
+<header class="nav">
+  <div class="row">
+    <div class="brand">
+      <img src="logo.png" alt="Onyx Smart Technologies">
+      <div class="div"></div>
+      <div class="label"><b>Tracer</b> · Cyber</div>
+    </div>
+    <nav class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#attacks">Attacks</a>
+      <a href="#cases">Cases</a>
+      <a href="#approach">Approach</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="hero-spot" id="hero-spot" aria-hidden="true"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="wrap">
+    <svg class="radar" viewBox="0 0 340 340" aria-hidden="true">
+      <defs>
+        <radialGradient id="rg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#5eead4" stop-opacity="0.42"/>
+          <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="radarHalo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#5eead4" stop-opacity="0.14"/>
+          <stop offset="65%"  stop-color="#5eead4" stop-opacity="0.025"/>
+          <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- soft halo behind everything -->
+      <circle cx="170" cy="170" r="158" fill="url(#radarHalo)"/>
+      <!-- faint inner reference ring (dashed) -->
+      <circle class="ring-faint" cx="170" cy="170" r="60"/>
+      <!-- main ring -->
+      <circle class="ring" cx="170" cy="170" r="120"/>
+      <!-- cardinal tick marks -->
+      <line class="tick" x1="170" y1="44" x2="170" y2="58"/>
+      <line class="tick" x1="170" y1="282" x2="170" y2="296"/>
+      <line class="tick" x1="44" y1="170" x2="58" y2="170"/>
+      <line class="tick" x1="282" y1="170" x2="296" y2="170"/>
+      <!-- center dot + breathing pulse -->
+      <circle class="center-pulse" cx="170" cy="170" r="3"/>
+      <circle class="center" cx="170" cy="170" r="2.5"/>
+      <!-- sweep quadrant -->
+      <g class="sweep">
+        <path d="M170 170 L170 50 A120 120 0 0 1 290 170 Z" fill="url(#rg)"/>
+      </g>
+      <!-- blips -->
+      <circle class="blip"   cx="138" cy="104" r="3"/>
+      <circle class="blip b" cx="218" cy="128" r="2.5"/>
+      <circle class="blip d" cx="206" cy="236" r="3.5"/>
+    </svg>
+
+    <div class="reveal badge-row">
+      <div class="badge"><span class="dot"></span>Onyx Smart Technologies — Cyber Research</div>
+      <div class="live-chip" aria-live="polite">
+        <span class="blip" aria-hidden="true"></span>
+        <span>monitoring</span>
+        <span class="now" id="live-now">adfdf9 · VANCE</span>
+      </div>
+    </div>
+    <h1 class="reveal d1" data-cascade>The maps lie.<br><span class="grad">We can prove where.</span></h1>
+    <p class="lede reveal d2">
+      ADS-B has no authentication. Anyone with a <strong>$300 software radio</strong> can broadcast a fake airliner.
+      Anyone with a feeder credential can push <strong>fabricated positions into FlightAware, FR24, ADS-B Exchange, or OpenSky</strong>.
+      We've catalogued <strong>32 confirmed and likely cases</strong> — including ones the aggregators silently scrubbed —
+      and are building the first detection layer aggregators can deploy directly against their own data.
+    </p>
+    <div class="stats reveal d3">
+      <div class="stat"><div class="num" data-counter="32">0</div><div class="label">cases catalogued</div></div>
+      <div class="stat"><div class="num" data-counter="17378">0</div><div class="label">candidates surfaced last week</div></div>
+      <div class="stat"><div class="num" data-counter="7">0</div><div class="label">physical invariants used</div></div>
+      <div class="stat"><div class="num">0</div><div class="label">cryptographic guarantees in ADS-B</div></div>
+    </div>
+  </div>
+
+  <div class="scroll-arrow">scroll</div>
+</section>
+
+<!-- ============== PROBLEM ============== -->
+<section id="problem">
+  <div class="wrap">
+    <div class="eyebrow reveal">The Problem</div>
+    <h2 class="reveal d1">ADS-B was designed as a broadcast bulletin board.<br>It is now critical infrastructure.</h2>
+    <p class="kicker reveal d2">
+      Every commercial aircraft yells its position over 1090 MHz, unencrypted and unsigned. Air traffic control, airline operations, search-and-rescue, and the public map all read from the same shouting room.
+    </p>
+    <div class="problem-grid">
+      <div class="reveal d2">
+        <p>A modern airliner transmits its identity, position, altitude, speed, and intent <strong>roughly every half-second</strong>, in plaintext. The protocol was finalised in 1997 with a security assumption that has not survived the SDR era: that nobody could afford the radio to fake it.</p>
+        <p>That assumption is now wrong by three orders of magnitude. A working ADS-B transmitter costs $300. A working aggregator-feeder push costs $0 — anyone with a feeder credential can write rows directly into the production database that FlightAware, FR24, ADS-B Exchange and OpenSky read from.</p>
+        <p>The result: <strong>every major aggregator has been spoofed at least once</strong>. Sometimes the attack lasts an hour and 58,000 viewers watch a destroyed aircraft fly. Sometimes the attack lasts five minutes, gets noticed by three Reddit users, and is silently scrubbed from history. Sometimes nobody notices at all.</p>
+      </div>
+      <div class="specs reveal d3">
+        <div><span class="k">Protocol</span><span class="v">1090 MHz Mode-S DF17</span></div>
+        <div><span class="k">Auth</span><span class="v">none</span></div>
+        <div><span class="k">Encryption</span><span class="v">none</span></div>
+        <div><span class="k">Frame size</span><span class="v">112 bits</span></div>
+        <div><span class="k">CRC</span><span class="v">24-bit, deterministic</span></div>
+        <div><span class="k">Spoofer cost</span><span class="v">$300 SDR + open-source</span></div>
+        <div><span class="k">Aggregators</span><span class="v">FR24, FA, ADSBex, OpenSky, +many</span></div>
+        <div><span class="k">Mitigations</span><span class="v">ad-hoc, per-aggregator</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== ATTACK TYPES ============== -->
+<section id="attacks">
+  <div class="wrap">
+    <div class="eyebrow reveal">Threat Taxonomy</div>
+    <h2 class="reveal d1">Three attack shapes. Each costs the attacker different things.</h2>
+    <p class="kicker reveal d2">Wrongness has multiple paths to the screen. The detection problem is the same: a track is displayed that does not correspond to a real aircraft moving as displayed.</p>
+    <div class="attack-types">
+      <div class="attack reveal d2" data-class="ghost">
+        <div class="tag">Class 1 · Ghost Injection</div>
+        <h3>An aircraft that doesn't exist.</h3>
+        <p>The attacker fabricates every field from code. Position, altitude, speed, callsign, hex — all synthesised. Broadcast over RF, or pushed through a feeder.</p>
+        <div class="example"><b>Example:</b> VANCE Mar-a-Lago, Jan 28-29 2026. 6,239 fabricated positions. Drew the word "VANCE" across Palm Beach in raster lines. Used AF1's hex `adfdf9`. 58k viewers.</div>
+      </div>
+      <div class="attack reveal d3" data-class="diversion">
+        <div class="tag">Class 2 · Diversion / Modification</div>
+        <h3>A real flight, with the data rewritten in-flight.</h3>
+        <p>A real aircraft is broadcasting normally. The attacker intercepts, modifies, or overrides position, altitude, callsign — leaving everything else real. The displayed flight diverges from physical truth.</p>
+        <div class="example"><b>Example:</b> THY580 Istanbul→Taif, Jan 26 2026. Two consecutive messages teleport the aircraft 270 km, then back. Implied speed: Mach 17. Altitude, gs, track all preserved.</div>
+      </div>
+      <div class="attack reveal d4" data-class="replay">
+        <div class="tag">Class 3 · Replay</div>
+        <h3>An old flight, rebroadcast as new.</h3>
+        <p>Captured frames from a previous flight (yours or someone else's) are emitted again, with or without modifications. The trajectory looks plausible because it's a real one — from yesterday, or last year, or another country.</p>
+        <div class="example"><b>Example:</b> FCKPUTIN — AN-225 "Mriya" hex `508035` broadcasting 12 days after the airframe's destruction in Ukraine. Confessed by author with full toolchain published.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FAMOUS CASES ============== -->
+<section id="cases">
+  <div class="wrap">
+    <div class="eyebrow reveal">Headline Cases</div>
+    <h2 class="reveal d1">The ones that made the news.</h2>
+    <p class="kicker reveal d2">Loud attacks where the attacker wanted to be seen. These are the cases the security press covers — but they are the easiest class to detect, not the hardest.</p>
+    <div class="cases-grid">
+
+      <div class="case reveal d2" tabindex="0"
+           data-img="research/investigations/maps/vance1.png"
+           data-class-label="Ghost · Mar-a-Lago"
+           data-name="VANCE — Mar-a-Lago raster portrait"
+           data-meta="2026-01-28 · Palm Beach, FL · provider_flight_id CYBER_VANCE1_*"
+           data-body="For roughly an hour on the night of January 28, a single feeder pushed 6,239 fabricated positions for hex <code>adfdf9</code> (Air Force One's VC-25A) across Mar-a-Lago. The points drew the word <b>VANCE</b> as a raster grid. Altitudes from -1 ft (below sea level) to 50,175 ft (5,000 ft above the airframe ceiling). Implied climb rates over 60 million ft/min. 22 simultaneous 1-degree cells claimed within a single minute.">
+        <div class="head">
+          <div class="name">VANCE — Mar-a-Lago raster portrait</div>
+          <div class="meta"><div class="badge-mini">Ghost</div><br>2026-01-28<br>Palm Beach, FL</div>
+        </div>
+        <p>For roughly an hour on the night of January 28, a single feeder pushed 6,239 fabricated positions for hex <code>adfdf9</code> (Air Force One's VC-25A) across Mar-a-Lago. The points drew the word "VANCE" as a raster grid. Altitudes from -1 ft to 50,175 ft. Implied climb rates over 60 million ft/min.</p>
+        <div class="facts"><span>served:</span> ADSBex, FR24, PlaneFinder <span>filtered:</span> FlightAware, Wingbits <span>peak rate:</span> 78,590 msg/sec</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-img="research/investigations/maps/fckputin.png"
+           data-class-label="Replay · Ukraine"
+           data-name="FCKPUTIN — broadcasting a destroyed aircraft"
+           data-meta="2022-03-11 · Ukrainian airspace · confessed by author"
+           data-body="Mathieu Peyréga, a French IT consultant, used a HackRF and the open-source <code>realtime-adsb-out</code> toolchain to broadcast hex <code>508035</code> — the Antonov AN-225 <b>Mriya</b>, destroyed at Hostomel 12 days earlier. He disabled MLAT on his feeder and falsified its location with Kyiv coordinates to defeat triangulation. FR24 served the spoof; 58,000 simultaneous viewers; FR24 sent a push alert. The author later confessed publicly.">
+        <div class="head">
+          <div class="name">FCKPUTIN — broadcasting a destroyed aircraft</div>
+          <div class="meta"><div class="badge-mini">Replay</div><br>2022-03-11<br>Ukrainian airspace</div>
+        </div>
+        <p>Mathieu Peyréga used a HackRF + <code>realtime-adsb-out</code> to broadcast hex <code>508035</code> — the AN-225 "Mriya," destroyed at Hostomel 12 days earlier. Disabled MLAT, faked Kyiv coordinates. FR24 served the spoof for 40 minutes; 58k viewers; FR24 sent a push alert. Author confessed.</p>
+        <div class="facts"><span>cost:</span> $300 SDR <span>visible:</span> 40 minutes <span>aftermath:</span> FR24 froze new-feeder onboarding for 3 weeks</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d2" tabindex="0"
+           data-img="research/investigations/maps/f18_argentina.png"
+           data-class-label="Ghost · Argentina"
+           data-name="F-18 formation over Argentina — TC1..TC10"
+           data-meta="2026-03-24 · Buenos Aires region · 50th anniversary Día de la Memoria"
+           data-body="Ten F-18 fighters appeared in perfect formation over the Argentine pampas on the 50th anniversary of the 1976 military coup. <b>Argentina does not operate F-18s</b> — its inventory is A-4AR Fightinghawks. The formation had no per-target GPS jitter; sequential callsigns TC1 through TC10. FR24 retroactively scrubbed the entire event from its historical archive — itself an operator-level acknowledgement that this was a spoof.">
+        <div class="head">
+          <div class="name">F-18 formation over Argentina — TC1..TC10</div>
+          <div class="meta"><div class="badge-mini">Ghost</div><br>2026-03-24<br>Buenos Aires region</div>
+        </div>
+        <p>Ten F-18 fighters in perfect formation over the Argentine pampas on the 50th anniversary of the 1976 military coup. Argentina does not operate F-18s. No per-target GPS jitter; sequential callsigns TC1-TC10. FR24 retroactively scrubbed.</p>
+        <div class="facts"><span>signature:</span> perfect-formation no-jitter <span>fleet check:</span> impossibility <span>op response:</span> FR24 historical scrubbing</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-img="research/investigations/maps/russian_737_aul285.png"
+           data-class-label="Diversion · Australia"
+           data-name="Russian 737 displayed over Australia"
+           data-meta="2026-03-14 · Northern Australia (real route: Moscow → Novokuznetsk)"
+           data-body="Smartavia flight AUL285 — a real Boeing 737-86N (hex <code>151fbc</code>, registration RA-73660) flying its real Moscow→Novokuznetsk rotation — was simultaneously displayed on FR24 cruising over the Australian Outback at FL282 / 452 kt. <b>The real airframe's identity was correct in every metadata field. Only the position was fabricated.</b> Only FR24 served the spoof. FR24 scrubbed the historical record within hours.">
+        <div class="head">
+          <div class="name">Russian 737 displayed over Australia</div>
+          <div class="meta"><div class="badge-mini">Diversion</div><br>2026-03-14<br>Northern Australia</div>
+        </div>
+        <p>Smartavia AUL285 (real 737, hex <code>151fbc</code>, flying its real Moscow→Novokuznetsk rotation) was simultaneously displayed on FR24 cruising over the Australian Outback. Real identity, fabricated position. Only FR24 served it. Scrubbed within hours.</p>
+        <div class="facts"><span>technique:</span> real ID + fake position <span>only on:</span> FR24 <span>scrubbed within:</span> hours</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== QUIET CASES ============== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Quiet Cases — Discovered in This Research</div>
+    <h2 class="reveal d1">The ones nobody noticed.</h2>
+    <p class="kicker reveal d2">These don't make the news because they're not trying to. They're the cases the architecture surfaces — found by combining physical invariants the attacker forgot to forge.</p>
+    <div class="cases-grid compact">
+
+      <div class="case reveal d2" tabindex="0"
+           data-img="research/investigations/maps/vance_quiet_2026_01_20.png"
+           data-class-label="Ghost · Reconnaissance"
+           data-name="VANCE quiet-phase reconnaissance"
+           data-meta="2026-01-16 → 27 · 10+ pre-viral days · Mar-a-Lago / Joint Base Andrews"
+           data-body="The famous Jan 28 VANCE event was not the start. The same hex <code>adfdf9</code> appeared on the same aggregator stack across <b>10+ separate days before the viral attack</b> — concentrated around Mar-a-Lago, plus the Joint Base Andrews approach corridor. Likely operator dry-runs, never publicly noticed at the time. This is the kind of pattern aggregator-side detection should surface as a precursor signal.">
+        <div class="head">
+          <div class="name">VANCE quiet-phase reconnaissance</div>
+          <div class="meta"><div class="badge-mini">Ghost</div><br>2026-01-16 → 27<br>Pre-viral</div>
+        </div>
+        <p>Hex <code>adfdf9</code> appeared on the same aggregators across 10+ separate days before the viral Jan 28 attack — concentrated around Mar-a-Lago and the Joint Base Andrews approach corridor. Likely operator dry-runs.</p>
+        <div class="facts"><span>days:</span> 10+ <span>concentration:</span> PBI ocean cell</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-svg="svg-thy580"
+           data-class-label="Diversion · Gulf of Suez"
+           data-name="THY580 — 270 km position jump"
+           data-meta="2026-01-26 07:38–07:40 UTC · TC-LSE A321neo · LTFM→OETF"
+           data-body="Turkish Airlines flight TK580 (A321neo, TC-LSE, hex <code>4BB1A4</code>) cruising LTFM→OETF at FL330. Three consecutive samples translate it <b>270 km NW</b> to Cairo airspace and immediately back to its true track, while altitude, ground-speed, track and squawk remain continuous. Implied speed during the jump: <b>~19,000 km/h, Mach 17</b>. No physical mechanism produces this. Only lat/lon were rewritten — a textbook aggregator-layer position substitution.">
+        <div class="head">
+          <div class="name">THY580 — 270 km position jump</div>
+          <div class="meta"><div class="badge-mini">Diversion</div><br>2026-01-26<br>Gulf of Suez</div>
+        </div>
+        <p>TK580 cruising LTFM→OETF at FL330. Three consecutive samples translate it 270 km NW and back. Altitude, gs, track, squawk all continuous. Implied speed: <b>Mach 17</b>.</p>
+        <div class="facts"><span>jump:</span> 270 km in 51 s <span>only fields changed:</span> lat/lon</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d2" tabindex="0"
+           data-svg="svg-crj2"
+           data-class-label="Ghost · Red Sea → LTBA"
+           data-name="CRJ2 Red Sea anonymous MLAT-only ghost"
+           data-meta="2026-01-22 23:41 → 2026-01-23 02:52 UTC · 919 positions · no hex on any"
+           data-body="919 consecutive positions across 190 minutes from Red Sea to Istanbul Atatürk. <b>Zero ICAO hex on every single message.</b> No callsign, no registration. Claimed aircraft type CRJ-200; sustained 540–580 kt at FL360 (above type ceiling and Vmo). Landed on LTBA — closed to commercial pax since 2019. All 919 messages source_type=MLAT, every ADS-B field NULL. No legitimate Mode-S airliner produces this — Mode-S frames carry the hex unconditionally.">
+        <div class="head">
+          <div class="name">CRJ2 Red Sea anonymous MLAT-only ghost</div>
+          <div class="meta"><div class="badge-mini">Ghost</div><br>2026-01-22 → 23<br>Red Sea → LTBA</div>
+        </div>
+        <p>919 consecutive positions, Red Sea → Istanbul Atatürk. <b>Zero ICAO hex on every message.</b> No callsign, no registration. Sustained 540-580 kt at FL360 (above CRJ-200 ceiling).</p>
+        <div class="facts"><span>identity:</span> none on 919/919 <span>speed:</span> Mach 0.95 in a CRJ-200</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-svg="svg-nbt501"
+           data-class-label="Likely · Athens → JFK"
+           data-name="NBT501 — wind corruption on a real long-haul"
+           data-meta="2026-05-21 16:13 → 2026-05-22 00:09 UTC · LN-FNC 787-9 · hex 47B12E"
+           data-body="Norse Atlantic's real Boeing 787-9 Athens→JFK service. Position, identity, altitude, IAS and Mach all correct throughout. But <b>56% of cruise reports (89 of 158)</b> carried physically impossible wind speeds — clustered at 850-900 kt where real values were 50-100 kt (typical N. Atlantic jet stream). The corruption spread across <b>71 distinct receiver facilities</b>, but only NBT501 was affected — no other long-haul that day. Bimodal wind distribution: real values around 85 kt, fake values around 10× that.">
+        <div class="head">
+          <div class="name">NBT501 — wind corruption on a real long-haul</div>
+          <div class="meta"><div class="badge-mini warn">Likely</div><br>2026-05-21<br>LGAV → KJFK</div>
+        </div>
+        <p>Real 787-9 Athens→JFK, hex <code>47B12E</code>. Position correct. But <b>56% of cruise reports</b> carried physically impossible wind speeds (850-900 kt vs real 50-100 kt). 71 facilities affected, only one flight.</p>
+        <div class="facts"><span>corruption:</span> wind field only <span>facilities:</span> 71 affected</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d2" tabindex="0"
+           data-img="research/investigations/maps/gatwick_corruption.png"
+           data-class-label="DB tamper · Gatwick"
+           data-name="Gatwick callsign substitution — U23881 → EC3881"
+           data-meta="2026-04-10 · Gatwick, UK · easyJet"
+           data-body="easyJet flight U23881 appeared on FR24 and PlaneFinder as <b>EC3881</b> — a Spanish registration prefix preserving the trailing four characters. ADSBex and RadarBox showed the real callsign. The substring-preserving substitution is a fingerprint of a string-replace operation on aggregator-side metadata, not RF. Two aggregators affected, two clean — consistent with a shared upstream metadata pipeline (FR24+PF share infrastructure).">
+        <div class="head">
+          <div class="name">Gatwick callsign substitution</div>
+          <div class="meta"><div class="badge-mini">DB tamper</div><br>2026-04-10<br>Gatwick, UK</div>
+        </div>
+        <p>easyJet U23881 appeared on FR24 and PlaneFinder as <b>EC3881</b> (Spanish prefix, last 4 chars preserved). ADSBex and RadarBox showed the real callsign. Signature of a database string-replace, not RF.</p>
+        <div class="facts"><span>only on:</span> FR24, PlaneFinder <span>signature:</span> 4-char substring preserved</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-svg="svg-lmu601"
+           data-class-label="Likely · Russian airspace"
+           data-name="LMU601 — diversion in Russian airspace"
+           data-meta="2026-01-25 · SU-TCP Air Cairo · HEGN → UUEE"
+           data-body="Air Cairo SU-TCP, Hurghada → Moscow Sheremetyevo. Trajectory carries normally up to the Russian border, then degrades into MLAT-only positions with sustained inconsistencies near Smolensk / Vyazma. Possibly GPS jamming, possibly aggregator-side, possibly both. <b>One of several similar Egypt→Moscow corridor cases that week</b> — LMU601, AFL429, RSX3317, SDM5975, MSC906 all showed border-crossing degradation patterns.">
+        <div class="head">
+          <div class="name">LMU601 diversion in Russian airspace</div>
+          <div class="meta"><div class="badge-mini warn">Likely</div><br>2026-01-25<br>HEGN → UUEE</div>
+        </div>
+        <p>Air Cairo SU-TCP, Hurghada → Moscow Sheremetyevo. Trajectory degrades into MLAT-only inconsistencies near Smolensk / Vyazma. Part of a cluster of Egypt→Moscow corridor cases that week.</p>
+        <div class="facts"><span>border-crossing:</span> degradation pattern <span>peers same week:</span> 4+</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d2" tabindex="0"
+           data-svg="svg-chaos31"
+           data-class-label="Likely · Caspian"
+           data-name="Caspian CHAOS31 — placeholder-hex anomaly"
+           data-meta="2026-05-20 → 21 · Salyan, Azerbaijan · hex 000001"
+           data-body="Five rotating callsigns (CHAOS31, DUSTY79, XCLNZ, 7D02E9, TB2T1071) broadcasting on the same default hex <code>000001</code> from a single feeder. <b>The same callsign appears at 200 ft and 20,100 ft within 22 seconds</b> — impossible for one airframe. Comm-B Enhanced-Surveillance fields populated at 0–88% depending on callsign — inconsistent with single transponder hardware. Mixed with what appears to be real Bayraktar TB2 drone activity using the same default hex.">
+        <div class="head">
+          <div class="name">Caspian CHAOS31 — placeholder-hex anomaly</div>
+          <div class="meta"><div class="badge-mini warn">Likely</div><br>2026-05-20 → 21<br>Salyan, Azerbaijan</div>
+        </div>
+        <p>5 rotating callsigns on hex <code>000001</code> from one feeder. Same callsign at 200 ft and 20,100 ft within 22 seconds. EHS density varies 0-88% per callsign — inconsistent with one transponder.</p>
+        <div class="facts"><span>callsigns on one hex:</span> 5+ <span>ehs density:</span> 0-88% per callsign</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+      <div class="case reveal d3" tabindex="0"
+           data-img="research/investigations/maps/gatwick_jet2_baseline.png"
+           data-class-label="Diversion · Gatwick"
+           data-name='Gatwick "Jet2 at Mach 3"'
+           data-meta="2026-04-10 · same day as EC3881 substitution · Gatwick approach"
+           data-body="On the same day as the easyJet callsign substitution, FR24 displayed a Jet2 aircraft on approach to Gatwick at Mach 3. The kinematic impossibility was screenshot-shared widely on r/flightradar24. Visible only on FR24 — every other aggregator showed the same airframe at normal approach speed. <b>Two distinct attack modes on the same aggregator on the same day</b> — one metadata-tier, one kinematic-tier.">
+        <div class="head">
+          <div class="name">Gatwick "Jet2 at Mach 3"</div>
+          <div class="meta"><div class="badge-mini">Diversion</div><br>2026-04-10<br>Gatwick approach</div>
+        </div>
+        <p>Same day as EC3881. FR24 displayed a Jet2 on approach to Gatwick at Mach 3. Visible only on FR24. Two attack modes on one aggregator on one day.</p>
+        <div class="facts"><span>same day as:</span> EC3881 substitution <span>same aggregator:</span> FR24</div>
+        <div class="case-view">view trajectory <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l5 5-5 5"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== DANGER ============== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Stakes</div>
+    <h2 class="reveal d1">Why this matters now.</h2>
+    <p class="kicker reveal d2">The cases that make the news are pranks. The cases that don't aren't.</p>
+    <div class="danger-grid">
+      <div class="danger-card reveal d2">
+        <h3>ATC and emergency response read the same data.</h3>
+        <p>Air traffic control is the formal source of truth, but the public maps that airlines, dispatchers, and search-and-rescue cross-reference under load read ADS-B aggregators. A poisoned aggregator feed during an in-flight emergency is a force-multiplier for confusion.</p>
+      </div>
+      <div class="danger-card reveal d3">
+        <h3>VIP and military movements are exposed.</h3>
+        <p>The same broadcast layer that the VANCE attacker used to draw graffiti can be used to track real military and head-of-state aircraft. Several state operators now deliberately broadcast misleading hex codes for OPSEC — but defenders cannot distinguish that from a third-party spoof if they cannot read the data layer carefully.</p>
+      </div>
+      <div class="danger-card reveal d2">
+        <h3>One feeder credential = global narrative.</h3>
+        <p>The cases above repeat one pattern: a single rogue feeder, often with falsified location and disabled MLAT, propagates to every aggregator that doesn't filter at ingest. FR24 froze new-feeder onboarding for three weeks after FCKPUTIN. That is the entire industry's current containment posture.</p>
+      </div>
+      <div class="danger-card reveal d3">
+        <h3>The detection precedent is the deterrent.</h3>
+        <p>Today there is no operational system the aggregators run to flag injection on the data layer. They mitigate post-hoc, by scrubbing the historical record and hoping few people noticed. Tracer's POC is a system they can deploy directly, in their own pipeline, that names what it sees.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== APPROACH ============== -->
+<section id="approach">
+  <div class="wrap">
+    <div class="eyebrow reveal">Approach</div>
+    <h2 class="reveal d1">The world is consistent. The attacker is not.</h2>
+    <p class="kicker reveal d2">A real aircraft satisfies a set of physical invariants simultaneously — physics, atmosphere, RF source, history. A synthesised track satisfies only the ones the attacker remembered to forge.</p>
+    <div class="approach-intro reveal d2">
+      The architecture is not a stack of ad-hoc rules. It is derived from one observation about the asymmetry of the problem:
+      <span class="pull">"Each invariant the world enforces is one more thing the attacker has to fake — and each costs them different effort. Detection becomes: <strong>test the invariants the attacker didn't.</strong>"</span>
+    </div>
+    <div class="axes">
+      <div class="axis reveal d2"><div class="num">I₁</div><div>
+        <h4>Physics</h4>
+        <p>Position is the integral of velocity. Velocity changes are bounded by aerodynamic acceleration. Altitude moves with vertical rate. A 19,000 ft altitude change in 22 seconds is not an airframe.</p>
+        <p class="cost">Attacker cost to satisfy: <b>trivial</b>. Most lazy attackers still fail it.</p></div></div>
+      <div class="axis reveal d3"><div class="num">I₂</div><div>
+        <h4>Aircraft Envelope</h4>
+        <p>Each airframe has a type, a ceiling, a Vmo, a service speed. A CRJ-200 at FL360 / Mach 0.95 is outside its envelope. A Cessna at FL400 is outside its envelope.</p>
+        <p class="cost">Attacker cost to satisfy: <b>low</b>. Stay within sensible bounds.</p></div></div>
+      <div class="axis reveal d2"><div class="num">I₃</div><div>
+        <h4>Atmosphere</h4>
+        <p>Every aircraft in the same airspace at the same altitude experiences the same wind, temperature, and pressure. We use peer aircraft as opportunistic sensors of the atmosphere they share.</p>
+        <p class="cost">Attacker cost to satisfy: <b>medium</b>. Requires real-time METAR / winds-aloft to forge. Most don't bother.</p></div></div>
+      <div class="axis reveal d3"><div class="num">I₄</div><div>
+        <h4>RF Source</h4>
+        <p>Each RF transmission comes from one location. Multiple receivers triangulate the source via MLAT. A claimed position must equal the actual emission point. Aggregator-layer injections fail this.</p>
+        <p class="cost">Attacker cost to satisfy: <b>high</b>. Requires colocation of a real transmitter with the claimed trajectory.</p></div></div>
+      <div class="axis reveal d2"><div class="num">I₅</div><div>
+        <h4>Universal Visibility</h4>
+        <p>Real RF propagates omnidirectionally. Every aggregator with a receiver in range should see it. An injection that appears only at FR24 and nowhere else is a fingerprint of the channel.</p>
+        <p class="cost">Attacker cost to satisfy: <b>very high</b>. Requires pushing to every aggregator consistently and simultaneously.</p></div></div>
+      <div class="axis reveal d3"><div class="num">I₆</div><div>
+        <h4>History</h4>
+        <p>Real aircraft have continuous lifecycles. The hex maps to a registry. The registry says whether the airframe is intact or destroyed. The trajectory shape is similar — or not — to past flights by this hex.</p>
+        <p class="cost">Attacker cost to satisfy: <b>medium</b>. Requires synthesising a complete history.</p></div></div>
+      <div class="axis reveal d2"><div class="num">I₇</div><div>
+        <h4>Data-Layer Completeness</h4>
+        <p>Real transponders broadcast Mode-S Comm-B downlinks that aggregators decode into derived fields: wind, temperature, true airspeed, autopilot state. Injection scripts don't.</p>
+        <p class="cost">Attacker cost to satisfy: <b>high</b>. Discovered in this research at &gt;100× signal separation.</p></div></div>
+      <div class="axis reveal d3"><div class="num">+</div><div>
+        <h4>Cross-day, cross-region</h4>
+        <p>Identity collisions — the same callsign on the same hex appearing in distant geographies on different days with totally different data-layer profiles — are unforgeable signatures of either default-hex collisions or deliberate identity copying.</p>
+        <p class="cost">Layer above the axes: meta-signal on the case base.</p></div></div>
+    </div>
+    <div class="math reveal d3">
+      <h3>The math, in one box.</h3>
+      <p>Each axis is an independent hypothesis test. It emits a log-likelihood ratio (LLR) for "fake" vs "real," weighted by data confidence on that flight.</p>
+      <div class="eq">log-posterior(fake) = log-prior + Σᵢ confidenceᵢ · LLRᵢ</div>
+      <p>The prior is heavily negative — base-rate of attacks is ~1 in 10⁵ to 10⁷ flights. To overcome it, the sum of axis evidence has to be large. That forces the attacker into a multi-axis evasion problem. <strong>Each invariant they satisfy costs them something; each they don't costs them detection.</strong> The system raises the bar measurably and is honest about which axes carried the verdict on each case.</p>
+      <p>Per-axis distributions are calibrated separately within coverage strata (dense CONUS, dense Europe, sparse oceanic, war-zone) because regional coverage shapes the noise floor of each axis. Confounded pairs — where two axes are correlated by a shared environmental cause — are factored before fusion. Diversion attacks are caught by per-axis online change-point detection, which fires when multiple axes shift coincidently in time within a single flight.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <div class="brand-block">
+        <img src="logo.png" alt="Onyx Smart Technologies">
+        <div style="font-size:14px;color:var(--text);font-weight:500">Onyx Smart Technologies · Tracer Cyber</div>
+        <div style="margin-top:4px;font-size:13px;color:var(--muted);max-width:420px">Detection layer for ADS-B aggregator-data integrity. Research POC; case set growing.</div>
+        <div class="links">
+          <a href="research/detection-architecture.md">architecture.md</a>
+          <a href="research/attack-and-detection-model.md">attacker-model.md</a>
+          <a href="research/investigations/">investigations/</a>
+          <a href="flights/README.md">case registry</a>
+        </div>
+      </div>
+      <div class="meta">Out-of-scope: GPS interference of the aircraft's own GNSS — different problem, different detection field.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============== LIGHTBOX MODAL ============== -->
+<div class="lb" id="lb" aria-hidden="true">
+  <div class="lb-bg"></div>
+  <div class="lb-inner" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lb-close" aria-label="Close">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+    </button>
+    <div class="lb-img-wrap" id="lb-img-wrap"></div>
+    <div class="lb-info">
+      <div class="lb-class" id="lb-class"></div>
+      <h3 id="lb-name"></h3>
+      <div class="lb-meta" id="lb-meta"></div>
+      <div class="lb-body" id="lb-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SVG DIAGRAMS (hidden, shown in lightbox) ============== -->
+<div style="display:none">
+
+  <!-- THY580: 270km position jump -->
+  <svg id="svg-thy580" class="traj-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="500" fill="#000"/>
+    <g class="grid">
+      <line x1="0" y1="100" x2="800" y2="100"/><line x1="0" y1="200" x2="800" y2="200"/>
+      <line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="400" x2="800" y2="400"/>
+      <line x1="100" y1="0" x2="100" y2="500"/><line x1="300" y1="0" x2="300" y2="500"/>
+      <line x1="500" y1="0" x2="500" y2="500"/><line x1="700" y1="0" x2="700" y2="500"/>
+    </g>
+    <text x="40" y="50" class="title">THY580 · Gulf of Suez · 270 km jump</text>
+    <text x="40" y="72" class="sub">2026-01-26 07:38–07:40 UTC · TC-LSE A321neo · LTFM→OETF</text>
+    <!-- Cruise track on track 144° -->
+    <path class="real-line" d="M 100 380 Q 250 360 380 350"/>
+    <path class="real-line" d="M 480 340 Q 600 320 720 300"/>
+    <!-- The two jump points -->
+    <path class="ghost" d="M 380 350 L 410 130 L 480 340"/>
+    <text x="420" y="125" class="lbl-warn">jump to 30.03°N, 31.45°E · Cairo area</text>
+    <text x="425" y="142" class="lbl-warn">implied speed ≈ Mach 17</text>
+    <!-- Points -->
+    <circle class="dot-real" cx="100" cy="380" r="4"/><text x="108" y="384" class="lbl">07:38:06</text>
+    <circle class="dot-real" cx="380" cy="350" r="5"/><text x="298" y="343" class="lbl">07:38:06 last real</text>
+    <circle class="dot-fake" cx="410" cy="130" r="6"/><text x="420" y="112" class="lbl">07:38:57 fake</text>
+    <circle class="dot-fake" cx="445" cy="130" r="6"/><text x="455" y="170" class="lbl">07:39:47 fake</text>
+    <circle class="dot-real" cx="480" cy="340" r="5"/><text x="488" y="334" class="lbl">07:40:19 back</text>
+    <circle class="dot-real" cx="720" cy="300" r="4"/>
+    <text x="40" y="470" class="lbl-acc">cyan = real cruise · red dashed = fabricated detour</text>
+    <text x="500" y="470" class="lbl">altitude, gs, track and squawk continuous across the jump</text>
+  </svg>
+
+  <!-- CRJ2 Red Sea -->
+  <svg id="svg-crj2" class="traj-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="500" fill="#000"/>
+    <g class="grid">
+      <line x1="0" y1="100" x2="800" y2="100"/><line x1="0" y1="200" x2="800" y2="200"/>
+      <line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="400" x2="800" y2="400"/>
+      <line x1="200" y1="0" x2="200" y2="500"/><line x1="400" y1="0" x2="400" y2="500"/>
+      <line x1="600" y1="0" x2="600" y2="500"/>
+    </g>
+    <text x="40" y="50" class="title">CRJ2 ghost · Red Sea → LTBA Istanbul</text>
+    <text x="40" y="72" class="sub">2026-01-22 23:41 → 2026-01-23 02:52 UTC · 919 points · 100% MLAT · 0 hex</text>
+    <!-- Ground line representing south to north -->
+    <path class="ghost" d="M 150 420 Q 350 380 420 280 Q 480 180 580 100"/>
+    <circle class="dot-fake" cx="150" cy="420" r="5"/>
+    <text x="160" y="436" class="lbl">first fix · mid-Red-Sea ~208 km NW of OEMA</text>
+    <circle class="dot-fake" cx="580" cy="100" r="6"/>
+    <text x="600" y="90" class="lbl">LTBA runway · 1,175 ft</text>
+    <text x="600" y="108" class="lbl">closed to commercial since 2019</text>
+    <!-- annotation: sustained 540-580 kt at FL360 -->
+    <rect x="290" y="220" width="200" height="80" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.3)" stroke-dasharray="4 2"/>
+    <text x="300" y="245" class="lbl-warn">FL360 cruise · 540-580 kt sustained</text>
+    <text x="300" y="262" class="lbl-warn">above CRJ-200 ceiling and Vmo</text>
+    <text x="300" y="285" class="lbl">hex: NULL — every message</text>
+    <text x="40" y="470" class="lbl-acc">red dashed = 100% MLAT-only · zero ICAO identity across 919 messages</text>
+  </svg>
+
+  <!-- NBT501 wind corruption -->
+  <svg id="svg-nbt501" class="traj-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="500" fill="#000"/>
+    <text x="40" y="50" class="title">NBT501 · LGAV → KJFK · wind-field corruption</text>
+    <text x="40" y="72" class="sub">2026-05-21 · LN-FNC 787-9 · hex 47B12E · 56% of cruise reports impossible wind</text>
+    <!-- Bimodal histogram of wind speeds -->
+    <g transform="translate(80,130)">
+      <!-- Y axis -->
+      <line class="ax" x1="0" y1="0" x2="0" y2="280"/>
+      <line class="ax" x1="0" y1="280" x2="640" y2="280"/>
+      <!-- Real cluster (cyan) 0-100 kt -->
+      <rect x="20" y="60" width="40" height="220" fill="rgba(94,234,212,.6)"/>
+      <text x="22" y="48" class="lbl">189</text>
+      <rect x="68" y="100" width="40" height="180" fill="rgba(94,234,212,.5)"/>
+      <text x="70" y="88" class="lbl">158</text>
+      <text x="22" y="305" class="lbl">0-50 kt</text>
+      <text x="62" y="305" class="lbl">50-100</text>
+      <!-- Gap -->
+      <rect x="120" y="276" width="200" height="4" fill="rgba(255,255,255,.05)"/>
+      <text x="160" y="220" class="lbl">no data (gap)</text>
+      <!-- Fake cluster (red) 600-1000 kt -->
+      <rect x="330" y="180" width="40" height="100" fill="rgba(239,68,68,.5)"/>
+      <text x="332" y="168" class="lbl-warn">40</text>
+      <rect x="378" y="160" width="40" height="120" fill="rgba(239,68,68,.7)"/>
+      <text x="380" y="148" class="lbl-warn">50</text>
+      <rect x="426" y="120" width="40" height="160" fill="rgba(239,68,68,.85)"/>
+      <text x="428" y="108" class="lbl-warn">69</text>
+      <text x="328" y="305" class="lbl">600-850 kt</text>
+      <text x="376" y="305" class="lbl">850-900</text>
+      <text x="426" y="305" class="lbl">900+</text>
+      <!-- annotations -->
+      <text x="60" y="-10" class="lbl-acc">real values · jet stream · 50-100 kt</text>
+      <text x="350" y="-10" class="lbl-warn">corrupt · ~10× real · 850-900 kt</text>
+    </g>
+    <text x="40" y="450" class="lbl">71 distinct facilities affected · no other long-haul that day showed the pattern</text>
+    <text x="40" y="470" class="lbl-acc">cyan bars = real wind reports · red bars = impossible wind reports</text>
+  </svg>
+
+  <!-- LMU601 border-crossing -->
+  <svg id="svg-lmu601" class="traj-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="500" fill="#000"/>
+    <text x="40" y="50" class="title">LMU601 · Hurghada → Moscow · border-crossing degradation</text>
+    <text x="40" y="72" class="sub">2026-01-25 · SU-TCP Air Cairo · MLAT-phase corruption near Smolensk/Vyazma</text>
+    <!-- Route from south to north with degradation -->
+    <path class="real-line" d="M 100 420 Q 220 380 320 320"/>
+    <line class="ax" x1="380" y1="100" x2="380" y2="400" stroke-dasharray="4 2"/>
+    <text x="390" y="120" class="lbl-warn">Russian border</text>
+    <path class="ghost" d="M 380 290 L 450 250 L 500 270 L 570 230 L 640 220"/>
+    <!-- destination -->
+    <circle class="dot-real" cx="100" cy="420" r="5"/>
+    <text x="110" y="436" class="lbl">HEGN Hurghada · ADSB clean</text>
+    <circle class="dot-fake" cx="640" cy="220" r="6"/>
+    <text x="540" y="208" class="lbl">SVO Moscow · MLAT-degraded approach</text>
+    <!-- Peer cluster annotation -->
+    <rect x="430" y="280" width="180" height="68" fill="rgba(239,68,68,.06)" stroke="rgba(239,68,68,.3)" stroke-dasharray="4 2"/>
+    <text x="438" y="300" class="lbl-warn">MLAT-only zone · Smolensk/Vyazma</text>
+    <text x="438" y="316" class="lbl">peers same week:</text>
+    <text x="438" y="332" class="lbl">AFL429, RSX3317, SDM5975, MSC906</text>
+    <text x="40" y="470" class="lbl-acc">cyan = clean ADS-B reception · red dashed = degraded MLAT-only segment</text>
+  </svg>
+
+  <!-- CHAOS31 altitude oscillation -->
+  <svg id="svg-chaos31" class="traj-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="500" fill="#000"/>
+    <text x="40" y="50" class="title">Caspian CHAOS31 · hex 000001 · altitude oscillation</text>
+    <text x="40" y="72" class="sub">2026-05-20 23:30 → 2026-05-21 02:00 UTC · Salyan, Azerbaijan · 1 facility</text>
+    <!-- y axis representing altitude -->
+    <g transform="translate(80,120)">
+      <line class="ax" x1="0" y1="0" x2="0" y2="320"/>
+      <line class="ax" x1="0" y1="320" x2="660" y2="320"/>
+      <text x="-65" y="10" class="lbl">20,100 ft</text>
+      <text x="-65" y="180" class="lbl">10,000 ft</text>
+      <text x="-65" y="318" class="lbl">200 ft</text>
+      <!-- High-altitude segment (TB2T1071) -->
+      <path class="real-line" d="M 0 10 L 80 10 L 100 10 L 160 10 L 180 10 L 280 10"/>
+      <!-- impossible drop -->
+      <line x1="280" y1="10" x2="290" y2="310" stroke="var(--danger)" stroke-width="2" stroke-dasharray="3 2"/>
+      <!-- Low-alt CHAOS31 segment -->
+      <path class="fake-line" stroke="var(--danger)" d="M 290 310 L 320 305 L 360 305 L 400 305"/>
+      <!-- impossible rise -->
+      <line x1="400" y1="305" x2="410" y2="10" stroke="var(--danger)" stroke-width="2" stroke-dasharray="3 2"/>
+      <path class="real-line" d="M 410 10 L 480 10 L 560 10 L 660 10"/>
+      <!-- annotations -->
+      <text x="0" y="-10" class="lbl-acc">TB2T1071 cruising FL200 (real Bayraktar?)</text>
+      <text x="300" y="280" class="lbl-warn">CHAOS31 at 200-500 ft</text>
+      <text x="305" y="265" class="lbl-warn">same hex, same minute</text>
+      <text x="265" y="180" class="lbl-warn" transform="rotate(-78 270 175)">-19,800 ft in 22 s</text>
+      <text x="395" y="180" class="lbl-warn" transform="rotate(78 400 175)">+19,600 ft in 71 s</text>
+      <!-- callsign markers -->
+      <circle class="dot-real" cx="100" cy="10" r="4"/>
+      <circle class="dot-fake" cx="320" cy="305" r="5"/>
+      <circle class="dot-fake" cx="400" cy="305" r="5"/>
+      <circle class="dot-real" cx="560" cy="10" r="4"/>
+    </g>
+    <text x="40" y="450" class="lbl">5 callsigns rotate on this hex: CHAOS31, DUSTY79, XCLNZ, 7D02E9, TB2T1071</text>
+    <text x="40" y="470" class="lbl-acc">cyan = TB2T1071 high-alt (multi-facility, partial EHS) · red = low-alt rotation (single facility, 0% EHS)</text>
+  </svg>
+
+</div>
+
+<script>
+(function(){
+  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const coarse  = matchMedia('(pointer:coarse)').matches;
+
+  const prog = document.getElementById('scroll-prog');
+  function tick(){
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', tick, {passive:true});
+  tick();
+
+  // ===== Reveal on scroll =====
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Eyebrow line draws even though it isn't .reveal — observe separately
+  const eyebrowIO = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        eyebrowIO.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.6});
+  document.querySelectorAll('.eyebrow').forEach(el=>eyebrowIO.observe(el));
+
+  // ===== H1 letter cascade =====
+  function cascade(el){
+    if(reduced) return;
+    const walk = (node, idxRef)=>{
+      const kids = Array.from(node.childNodes);
+      kids.forEach(child=>{
+        if(child.nodeType === 3){ // text
+          const text = child.textContent;
+          const frag = document.createDocumentFragment();
+          for(const ch of text){
+            const s = document.createElement('span');
+            s.className = 'ltr' + (ch === ' ' ? ' sp' : '');
+            s.textContent = ch === ' ' ? ' ' : ch;
+            s.style.animationDelay = (0.18 + idxRef.i * 0.022) + 's';
+            frag.appendChild(s);
+            idxRef.i++;
+          }
+          node.replaceChild(frag, child);
+        } else if(child.nodeType === 1 && child.tagName === 'BR'){
+          // keep, no delay bump
+        } else if(child.nodeType === 1){
+          walk(child, idxRef);
+        }
+      });
+    };
+    walk(el, {i:0});
+  }
+  document.querySelectorAll('h1[data-cascade]').forEach(cascade);
+
+  // ===== Slot-machine stat scramble =====
+  function scramble(el){
+    const target = parseInt(el.dataset.counter,10);
+    if(!target || isNaN(target)) { el.textContent = el.textContent; return; }
+    if(reduced){ el.textContent = target.toLocaleString(); return; }
+    const finalStr = target.toLocaleString();
+    const len = finalStr.length;
+    el.classList.add('flash');
+    const start = performance.now();
+    const scrambleDur = 700;
+    const settleStagger = 80;
+    const totalDur = scrambleDur + len * settleStagger + 120;
+    function step(now){
+      const elapsed = now - start;
+      let out = '';
+      for(let i=0;i<len;i++){
+        const ch = finalStr[i];
+        if(/[0-9]/.test(ch)){
+          const settleAt = scrambleDur + i * settleStagger;
+          if(elapsed >= settleAt){
+            out += ch;
+          } else {
+            out += Math.floor(Math.random()*10);
+          }
+        } else {
+          out += ch;
+        }
+      }
+      el.textContent = out;
+      if(elapsed < totalDur){
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = finalStr;
+        setTimeout(()=>el.classList.remove('flash'), 700);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  const statsIO = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const nums = e.target.querySelectorAll('[data-counter]');
+        nums.forEach((n,i)=>setTimeout(()=>scramble(n), i*120));
+        statsIO.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.4});
+  document.querySelectorAll('.stats').forEach(el=>statsIO.observe(el));
+
+  // ===== Custom cursor =====
+  if(!coarse && !reduced){
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    let mx = -100, my = -100, rx = -100, ry = -100, dx = -100, dy = -100;
+    window.addEventListener('pointermove', e=>{ mx = e.clientX; my = e.clientY; }, {passive:true});
+    function loop(){
+      dx += (mx - dx) * 0.65;
+      dy += (my - dy) * 0.65;
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      dot.style.transform  = `translate3d(${dx}px,${dy}px,0)`;
+      ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
+      requestAnimationFrame(loop);
+    }
+    loop();
+    const hoverSel = 'a,button,.case,.attack,.danger-card,.axis,.nav-links a,.brand,.live-chip,.lb-close';
+    document.querySelectorAll(hoverSel).forEach(el=>{
+      el.addEventListener('pointerenter', ()=>ring.classList.add('over'));
+      el.addEventListener('pointerleave', ()=>ring.classList.remove('over'));
+    });
+  }
+
+  // ===== Hero-only smoothed spotlight =====
+  if(!reduced && !coarse){
+    const hero = document.querySelector('.hero');
+    const spot = document.getElementById('hero-spot');
+    if(hero && spot){
+      let tx = hero.clientWidth/2, ty = hero.clientHeight*0.3;
+      let cx = tx, cy = ty;
+      window.addEventListener('pointermove', e=>{
+        const r = hero.getBoundingClientRect();
+        if(e.clientY >= r.top && e.clientY <= r.bottom){
+          tx = e.clientX - r.left;
+          ty = e.clientY - r.top;
+        }
+      }, {passive:true});
+      function loop(){
+        cx += (tx - cx) * 0.14;
+        cy += (ty - cy) * 0.14;
+        spot.style.setProperty('--mx', cx + 'px');
+        spot.style.setProperty('--my', cy + 'px');
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+  }
+
+  // ===== Card mouse-position glow =====
+  if(!reduced){
+    const glowSel = '.case, .attack, .danger-card, .axis';
+    document.querySelectorAll(glowSel).forEach(card=>{
+      card.addEventListener('pointermove', e=>{
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }, {passive:true});
+    });
+  }
+
+  // ===== Live chip rotator =====
+  (function liveChip(){
+    const el = document.getElementById('live-now');
+    if(!el) return;
+    const items = [
+      'adfdf9 · VANCE',
+      '508035 · FCKPUTIN',
+      '4BB1A4 · THY580',
+      'NULL · CRJ2 ghost',
+      '47B12E · NBT501',
+      '151fbc · AUL285',
+      '000001 · CHAOS31',
+      'EC3881 · Gatwick'
+    ];
+    let i = 0;
+    setInterval(()=>{
+      el.classList.add('swap');
+      setTimeout(()=>{
+        i = (i+1) % items.length;
+        el.textContent = items[i];
+        el.classList.remove('swap');
+      }, 240);
+    }, 2600);
+  })();
+
+  // ===== LIGHTBOX =====
+  const lb = document.getElementById('lb');
+  const lbClose = document.getElementById('lb-close');
+  const lbImgWrap = document.getElementById('lb-img-wrap');
+  const lbClass = document.getElementById('lb-class');
+  const lbName = document.getElementById('lb-name');
+  const lbMeta = document.getElementById('lb-meta');
+  const lbBody = document.getElementById('lb-body');
+
+  function openCase(card){
+    const img = card.dataset.img;
+    const svgId = card.dataset.svg;
+    lbClass.textContent = card.dataset.classLabel || '';
+    lbName.textContent = card.dataset.name || '';
+    lbMeta.textContent = card.dataset.meta || '';
+    lbBody.innerHTML = card.dataset.body || '';
+    lbImgWrap.innerHTML = '';
+    if(img){
+      const i = document.createElement('img');
+      i.src = img;
+      i.alt = card.dataset.name || '';
+      lbImgWrap.appendChild(i);
+    } else if(svgId){
+      const tpl = document.getElementById(svgId);
+      if(tpl){
+        const clone = tpl.cloneNode(true);
+        clone.removeAttribute('id');
+        clone.style.display = 'block';
+        lbImgWrap.appendChild(clone);
+      }
+    }
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeCase(){
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+    setTimeout(()=>{lbImgWrap.innerHTML=''},400);
+  }
+  document.querySelectorAll('.case').forEach(card=>{
+    card.addEventListener('click', ()=>openCase(card));
+    card.addEventListener('keydown', e=>{
+      if(e.key==='Enter' || e.key===' '){e.preventDefault();openCase(card)}
+    });
+  });
+  lbClose.addEventListener('click', closeCase);
+  lb.addEventListener('click', e=>{ if(e.target===lb || e.target.classList.contains('lb-bg')) closeCase(); });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && lb.classList.contains('open')) closeCase();
+  });
+})();
+</script>
+
+</body>
+</html>

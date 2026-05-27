@@ -29,9 +29,9 @@ const App: React.FC = () => {
   const goToHome = () => setAppState(AppState.CONTENT);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050505] overflow-hidden flex flex-col items-center justify-center">
+    <div className="relative min-h-screen w-full bg-[#050505] overflow-x-hidden">
       <BackgroundEffect />
-      
+
       <AnimatePresence mode="wait">
         {appState === AppState.LOADING && (
           <motion.div
@@ -39,7 +39,7 @@ const App: React.FC = () => {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 1, ease: "easeInOut" }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-[#050505]"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]"
           >
             <LoadingScreen />
           </motion.div>
@@ -65,7 +65,7 @@ const App: React.FC = () => {
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 1.05, filter: 'blur(20px)' }}
             transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="relative z-20 w-full flex items-center justify-center p-6"
+            className="fixed inset-0 z-20 flex items-center justify-center p-6 overflow-y-auto"
           >
             <LoginForm onBack={goToHome} />
           </motion.div>
