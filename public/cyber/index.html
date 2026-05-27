@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tracer Cyber — Onyx Smart Technologies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Oxanium:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#050608;
@@ -21,8 +24,10 @@
     --danger:#ef4444;
     --mono:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
     --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --display:'Oxanium','Space Grotesk','Inter',sans-serif;
     --ease:cubic-bezier(.2,.7,.2,1);
   }
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em}
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   html,body{margin:0;padding:0;background:var(--bg)}
@@ -532,6 +537,14 @@
   h1 .grad{
     background-size:200% 100%;
     animation:gradShimmer 14s var(--ease) infinite;
+  }
+  /* Cascade wraps each char in .ltr (inline-block); inherited
+     -webkit-text-fill-color:transparent then hides the letters because the
+     gradient lives on .grad, not its children. Re-paint the gradient per letter. */
+  h1 .grad .ltr{
+    background:linear-gradient(135deg,#5eead4 0%,#38bdf8 55%,#a78bfa 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    background-size:200% 100%;
   }
   @keyframes gradShimmer{
     0%,100%{background-position:0% 50%}
@@ -1060,9 +1073,86 @@
     font-family:var(--mono);font-size:11px;color:var(--dim);
     letter-spacing:.14em;text-transform:uppercase;
   }
+
+  /* ============== HUD BEZEL FRAME ============== */
+  .hud-frame{
+    position:fixed;top:14px;left:14px;right:14px;bottom:14px;
+    pointer-events:none;z-index:60;
+  }
+  .hud-frame svg{display:block;width:100%;height:100%;overflow:visible}
+  @media (max-width:720px){
+    .hud-frame{top:8px;left:8px;right:8px;bottom:8px}
+  }
+
+  /* ============== MODULES (physics balls) SECTION ============== */
+  #modules{padding:128px 0;position:relative}
+  #modules .eyebrow{
+    display:inline-flex;align-items:center;gap:12px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--accent);font-weight:700;
+  }
+  #modules .eyebrow::before{
+    content:"";display:block;width:32px;height:1px;background:var(--accent);opacity:.5;
+  }
+  #modules .grid-2{
+    display:grid;grid-template-columns:1.05fr 1fr;gap:60px;align-items:center;margin-top:32px;
+  }
+  @media (max-width:900px){#modules .grid-2{grid-template-columns:1fr;gap:36px}}
+  #modules h2{
+    font-size:clamp(36px,5vw,68px);line-height:1.02;margin:18px 0 0;
+    font-weight:300;
+  }
+  #modules h2 em{
+    font-style:italic;font-weight:400;color:var(--text);
+  }
+  #modules .blurb{
+    color:var(--muted);font-size:17px;line-height:1.65;margin-top:24px;max-width:540px;
+  }
+  #modules .hint{
+    margin-top:24px;font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--dim);
+  }
+  #modules .panel{
+    position:relative;height:560px;border:1px solid var(--line-strong);
+    border-radius:16px;background:linear-gradient(to bottom,rgba(255,255,255,.025),transparent);
+    overflow:hidden;
+  }
+  #modules .panel .panel-label{
+    position:absolute;top:14px;left:18px;z-index:2;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--accent);font-weight:700;
+  }
+  #modules .panel .panel-status{
+    position:absolute;top:14px;right:18px;z-index:2;
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  #modules .panel .panel-status::before{
+    content:"";display:block;width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  #modules .panel canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+  #modules .panel .corner-tick{
+    position:absolute;width:14px;height:14px;
+    border:1.5px solid rgba(94,234,212,.55);
+    pointer-events:none;
+  }
+  #modules .panel .corner-tick.tl{top:6px;left:6px;border-right:none;border-bottom:none}
+  #modules .panel .corner-tick.tr{top:6px;right:6px;border-left:none;border-bottom:none}
+  #modules .panel .corner-tick.bl{bottom:6px;left:6px;border-right:none;border-top:none}
+  #modules .panel .corner-tick.br{bottom:6px;right:6px;border-left:none;border-top:none}
 </style>
 </head>
 <body>
+
+<!-- ============== HUD BEZEL FRAME ============== -->
+<div class="hud-frame" id="hud-frame" aria-hidden="true">
+  <svg id="hud-frame-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <!-- path is set by inline script using real pixel dimensions; this is a placeholder -->
+  </svg>
+</div>
 
 <!-- ============== INTRO SCENARIO ============== -->
 <div class="intro-sim" id="intro-sim" role="dialog" aria-modal="true" aria-label="Initial scenario">
@@ -1709,6 +1799,33 @@
       <div class="eq">log-posterior(fake) = log-prior + Σᵢ confidenceᵢ · LLRᵢ</div>
       <p>The prior is heavily negative — base-rate of attacks is ~1 in 10⁵ to 10⁷ flights. To overcome it, the sum of axis evidence has to be large. That forces the attacker into a multi-axis evasion problem. <strong>Each invariant they satisfy costs them something; each they don't costs them detection.</strong> The system raises the bar measurably and is honest about which axes carried the verdict on each case.</p>
       <p>Per-axis distributions are calibrated separately within coverage strata (dense CONUS, dense Europe, sparse oceanic, war-zone) because regional coverage shapes the noise floor of each axis. Confounded pairs — where two axes are correlated by a shared environmental cause — are factored before fusion. Diversion attacks are caught by per-axis online change-point detection, which fires when multiple axes shift coincidently in time within a single flight.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== MODULES IN PLAY (matter-js physics) ============== -->
+<section id="modules">
+  <div class="wrap">
+    <div class="eyebrow reveal d1">Invariants</div>
+    <h2 class="reveal d1">Seven invariants. <em>Each one the attacker has to fake.</em></h2>
+    <div class="grid-2">
+      <div>
+        <p class="blurb reveal d2">
+          Physics, aircraft envelope, atmosphere, RF source, universal visibility, history, data-layer completeness.
+          Each is an independent hypothesis test that costs the attacker different effort to satisfy.
+          Drag the modules — they're alive.
+        </p>
+        <div class="hint reveal d2">Detection — by elimination</div>
+      </div>
+      <div class="panel reveal d2">
+        <div class="panel-label">Tracer / invariants</div>
+        <div class="panel-status">live</div>
+        <span class="corner-tick tl"></span>
+        <span class="corner-tick tr"></span>
+        <span class="corner-tick bl"></span>
+        <span class="corner-tick br"></span>
+        <canvas id="modules-canvas"></canvas>
+      </div>
     </div>
   </div>
 </section>
@@ -2612,6 +2729,245 @@ window.__startIntroSim = function introScenario(){
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape' && lb.classList.contains('open')) closeCase();
   });
+})();
+
+/* ===================== HUD BEZEL FRAME ===================== */
+(function(){
+  const RADIUS=22, NOTCH_W=240, NOTCH_H=44, NOTCH_DIAG=36, INSET=14;
+  const svg = document.getElementById('hud-frame-svg');
+  if (!svg) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  // Replace placeholder path
+  svg.innerHTML = '';
+  const defs = document.createElementNS(ns, 'defs');
+  defs.innerHTML = `<linearGradient id="hud-grad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%"   stop-color="rgba(94,234,212,0.55)"/>
+    <stop offset="50%"  stop-color="rgba(94,234,212,0.18)"/>
+    <stop offset="100%" stop-color="rgba(94,234,212,0.55)"/>
+  </linearGradient>`;
+  svg.appendChild(defs);
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke','url(#hud-grad)');
+  path.setAttribute('stroke-width','1');
+  svg.appendChild(path);
+  const tick1 = document.createElementNS(ns, 'circle');
+  tick1.setAttribute('r','2');
+  tick1.setAttribute('fill','rgba(94,234,212,0.7)');
+  svg.appendChild(tick1);
+  const tick2 = document.createElementNS(ns, 'circle');
+  tick2.setAttribute('r','2');
+  tick2.setAttribute('fill','rgba(94,234,212,0.7)');
+  svg.appendChild(tick2);
+
+  function update(){
+    const w = window.innerWidth - INSET*2;
+    const h = window.innerHeight - INSET*2;
+    if (w<=0 || h<=0) return;
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('preserveAspectRatio','none');
+    // Adjust the notch size on small screens
+    const notchW = Math.min(NOTCH_W, w * 0.35);
+    const d = [
+      `M ${RADIUS} 0`,
+      `L ${w - notchW - NOTCH_DIAG} 0`,
+      `L ${w - notchW} ${NOTCH_H}`,
+      `L ${w} ${NOTCH_H}`,
+      `L ${w} ${h - RADIUS}`,
+      `A ${RADIUS} ${RADIUS} 0 0 1 ${w - RADIUS} ${h}`,
+      `L ${notchW + NOTCH_DIAG} ${h}`,
+      `L ${notchW} ${h - NOTCH_H}`,
+      `L 0 ${h - NOTCH_H}`,
+      `L 0 ${RADIUS}`,
+      `A ${RADIUS} ${RADIUS} 0 0 1 ${RADIUS} 0`,
+      'Z'
+    ].join(' ');
+    path.setAttribute('d', d);
+    tick1.setAttribute('cx', String(w - notchW));
+    tick1.setAttribute('cy', String(NOTCH_H));
+    tick2.setAttribute('cx', String(notchW));
+    tick2.setAttribute('cy', String(h - NOTCH_H));
+  }
+  update();
+  window.addEventListener('resize', update);
+})();
+
+/* ===================== MODULES — PHYSICS BALLS (matter-js, lazy) ===================== */
+(function(){
+  const canvas = document.getElementById('modules-canvas');
+  const panel = canvas && canvas.closest('.panel');
+  if (!canvas || !panel) return;
+  let inited = false;
+
+  function loadMatter(){
+    return new Promise((resolve, reject) => {
+      if (window.Matter) return resolve(window.Matter);
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js';
+      s.async = true;
+      s.onload = () => resolve(window.Matter);
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function init(){
+    if (inited) return;
+    inited = true;
+    loadMatter().then(initEngine).catch(err => console.warn('matter-js failed to load', err));
+  }
+
+  function initEngine(Matter){
+    const rect = panel.getBoundingClientRect();
+    let w = rect.width, h = rect.height;
+    if (w < 50 || h < 50) return;
+
+    const engine = Matter.Engine.create({ gravity: { x:0, y:1, scale:0.0009 } });
+    const render = Matter.Render.create({
+      canvas, engine,
+      options: {
+        width: w, height: h,
+        wireframes: false, background: 'transparent',
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      },
+    });
+
+    const WALL_T = 200;
+    const wallOpts = { isStatic: true, render: { visible: false } };
+    function makeWalls(){
+      return [
+        Matter.Bodies.rectangle(w/2, -WALL_T/2, w + WALL_T*2, WALL_T, wallOpts),
+        Matter.Bodies.rectangle(w/2, h + WALL_T/2, w + WALL_T*2, WALL_T, wallOpts),
+        Matter.Bodies.rectangle(-WALL_T/2, h/2, WALL_T, h + WALL_T*2, wallOpts),
+        Matter.Bodies.rectangle(w + WALL_T/2, h/2, WALL_T, h + WALL_T*2, wallOpts),
+      ];
+    }
+    let walls = makeWalls();
+    Matter.Composite.add(engine.world, walls);
+
+    const ctx = canvas.getContext('2d');
+    const baseFont = Math.max(11, Math.min(16, w / 32));
+    const padX = baseFont * 1.5;
+    const padY = baseFont * 1.1;
+    const maxHalfW = w * 0.4;
+    const maxHalfH = h * 0.10;
+
+    const ITEMS = [
+      { label: 'I₁ Physics', weight: 1.05 },
+      { label: 'I₂ Envelope', weight: 1.0 },
+      { label: 'I₃ Atmosphere', weight: 1.05 },
+      { label: 'I₄ RF Source', weight: 1.0 },
+      { label: 'I₅ Visibility', weight: 1.0 },
+      { label: 'I₆ History', weight: 0.95 },
+      { label: 'I₇ Data-layer', weight: 1.05 },
+      { label: '∑ LLR fusion', weight: 1.1 },
+    ];
+
+    function measure(label, fontPx){
+      ctx.font = `600 ${fontPx}px Oxanium, system-ui, sans-serif`;
+      return ctx.measureText(label).width;
+    }
+
+    const balls = [];
+    const pending = ITEMS.map((it, idx) => {
+      const weight = Math.min(1.15, Math.max(0.85, it.weight || 1));
+      const fontPx = baseFont * weight;
+      const textW = measure(it.label, fontPx);
+      let halfW = (textW + padX) / 2;
+      let halfH = (fontPx + padY) / 2;
+      halfW = Math.min(halfW, maxHalfW);
+      halfH = Math.min(halfH, maxHalfH);
+      const chamfer = Math.min(halfH * 0.95, halfW * 0.95);
+      const xJ = ((idx * 0.6180339887) % 1) * (w - halfW * 2 - 40) + halfW + 20;
+      const body = Matter.Bodies.rectangle(xJ, -halfH - 30, halfW*2, halfH*2, {
+        chamfer: { radius: chamfer },
+        restitution: 0.4, friction: 0.1, frictionAir: 0.02, density: 0.0022,
+        render: {
+          fillStyle: 'rgba(255,255,255,0.94)',
+          strokeStyle: 'rgba(94,234,212,0.4)',
+          lineWidth: 1.5,
+        },
+      });
+      body.__label = it.label;
+      body.__fontPx = fontPx;
+      return body;
+    });
+
+    const dropTimers = pending.map((body, i) =>
+      setTimeout(() => { Matter.Composite.add(engine.world, body); balls.push(body); }, 180 * i)
+    );
+
+    // Velocity cap so things never tunnel
+    Matter.Events.on(engine, 'beforeUpdate', () => {
+      const maxV = 25;
+      for (const b of balls) {
+        if (b.speed > maxV) {
+          const s = maxV / b.speed;
+          Matter.Body.setVelocity(b, { x: b.velocity.x * s, y: b.velocity.y * s });
+        }
+      }
+    });
+
+    // Labels
+    Matter.Events.on(render, 'afterRender', () => {
+      const c = render.context;
+      c.save();
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      balls.forEach(b => {
+        c.save();
+        c.translate(b.position.x, b.position.y);
+        c.rotate(b.angle);
+        c.font = `600 ${b.__fontPx}px Oxanium, system-ui, sans-serif`;
+        c.fillStyle = 'rgb(8,12,15)';
+        c.fillText(b.__label, 0, 0);
+        c.restore();
+      });
+      c.restore();
+    });
+
+    // Mouse + remove wheel hijack
+    const mouse = Matter.Mouse.create(canvas);
+    const mc = Matter.MouseConstraint.create(engine, {
+      mouse, constraint: { stiffness: 0.18, damping: 0.2, render: { visible: false } },
+    });
+    Matter.Composite.add(engine.world, mc);
+    mouse.element.removeEventListener('mousewheel', mouse.mousewheel);
+    mouse.element.removeEventListener('DOMMouseScroll', mouse.mousewheel);
+
+    const runner = Matter.Runner.create();
+    Matter.Runner.run(runner, engine);
+    Matter.Render.run(render);
+
+    // Pause when off-screen / tab hidden
+    let isVisible = true, isRunning = true;
+    function pause(){ if(!isRunning) return; Matter.Runner.stop(runner); Matter.Render.stop(render); isRunning = false; }
+    function resume(){ if(isRunning) return; Matter.Runner.run(runner, engine); Matter.Render.run(render); isRunning = true; }
+    function update(){ if (isVisible && !document.hidden) resume(); else pause(); }
+    const ioRun = new IntersectionObserver(es => { isVisible = es[0]?.isIntersecting ?? false; update(); }, { threshold: 0.05 });
+    ioRun.observe(panel);
+    document.addEventListener('visibilitychange', update);
+
+    // Resize handling
+    const ro = new ResizeObserver(() => {
+      const r = panel.getBoundingClientRect();
+      if (Math.abs(r.width - w) < 1 && Math.abs(r.height - h) < 1) return;
+      w = r.width; h = r.height;
+      const pr = render.options.pixelRatio || 1;
+      canvas.width = w * pr; canvas.height = h * pr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      render.options.width = w; render.options.height = h;
+      Matter.Composite.remove(engine.world, walls);
+      walls = makeWalls();
+      Matter.Composite.add(engine.world, walls);
+    });
+    ro.observe(panel);
+  }
+
+  // Lazy-load matter only when the panel approaches the viewport
+  const io = new IntersectionObserver((es) => {
+    if (es[0] && es[0].isIntersecting) { init(); io.disconnect(); }
+  }, { rootMargin: '160px', threshold: 0.05 });
+  io.observe(panel);
 })();
 </script>
 

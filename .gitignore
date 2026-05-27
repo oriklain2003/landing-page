@@ -44,3 +44,8 @@ coverage/
 *.local
 .cache/
 .playwright-mcp/
+
+# Verification screenshots (root only)
+/*.jpg
+/*.jpeg
+/*.png

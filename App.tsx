@@ -5,6 +5,7 @@ import LoadingScreen from './components/LoadingScreen';
 import ComingSoonContent from './components/ComingSoonContent';
 import LoginForm from './components/LoginForm';
 import BackgroundEffect from './components/BackgroundEffect';
+import HudFrame from './components/HudFrame';
 import { AppState } from './types';
 
 const App: React.FC = () => {
@@ -29,8 +30,11 @@ const App: React.FC = () => {
   const goToHome = () => setAppState(AppState.CONTENT);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050505] overflow-hidden flex flex-col items-center justify-center">
-      <BackgroundEffect />
+    <div className="relative min-h-screen w-full bg-[#050505]">
+      <div className="fixed inset-0 -z-10">
+        <BackgroundEffect />
+      </div>
+      {appState !== AppState.LOADING && <HudFrame />}
 
       <AnimatePresence mode="wait">
         {appState === AppState.LOADING && (
