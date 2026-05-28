@@ -6,6 +6,7 @@ import ComingSoonContent from './components/ComingSoonContent';
 import LoginForm from './components/LoginForm';
 import BackgroundEffect from './components/BackgroundEffect';
 import HudFrame from './components/HudFrame';
+import ParticleOrb from './components/ParticleOrb';
 import { AppState } from './types';
 
 const App: React.FC = () => {
@@ -34,6 +35,11 @@ const App: React.FC = () => {
       <div className="fixed inset-0 -z-10">
         <BackgroundEffect />
       </div>
+      {appState === AppState.CONTENT && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <ParticleOrb className="w-full h-full" />
+        </div>
+      )}
       {appState !== AppState.LOADING && <HudFrame />}
 
       <AnimatePresence mode="wait">

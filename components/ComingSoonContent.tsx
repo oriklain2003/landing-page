@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import WaitlistForm from './WaitlistForm';
-import ParticleOrb from './ParticleOrb';
 import BriefSection from './BriefSection';
 import TracerSection from './TracerSection';
 
@@ -129,18 +128,6 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
         className="relative min-h-screen w-full flex flex-col items-center justify-center px-6 overflow-hidden"
       >
         <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-4xl space-y-12 w-full">
-          {/* Particle orb behind the hero copy */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-10">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 2, ease: [0.16, 1, 0.3, 1] }}
-              className="w-[min(120vw,1100px)] h-[min(95vh,820px)]"
-            >
-              <ParticleOrb className="w-full h-full" />
-            </motion.div>
-          </div>
-
           <div className="space-y-8 relative">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
