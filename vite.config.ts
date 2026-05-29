@@ -7,10 +7,15 @@ const staticDirectoryIndex = (): Plugin => ({
   name: 'static-directory-index',
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
-      if (req.url && req.url.endsWith('/') && req.url !== '/') {
-        const candidate = path.join(__dirname, 'public', req.url, 'index.html');
-        if (fs.existsSync(candidate)) {
-          req.url = req.url + 'index.html';
+      if (req.url) {
+        const qIdx = req.url.indexOf('?');
+        const pathname = qIdx === -1 ? req.url : req.url.slice(0, qIdx);
+        const query = qIdx === -1 ? '' : req.url.slice(qIdx);
+        if (pathname.endsWith('/') && pathname !== '/') {
+          const candidate = path.join(__dirname, 'public', pathname, 'index.html');
+          if (fs.existsSync(candidate)) {
+            req.url = pathname + 'index.html' + query;
+          }
         }
       }
       next();
