@@ -16,6 +16,8 @@ interface ParticleOrbProps {
   className?: string;
   /** Section IDs whose y-positions drive the form transitions, in order. */
   sectionIds?: string[];
+  /** URL of an SVG/PNG icon used as the sprite in the trails form. */
+  planeIconUrl?: string;
 }
 
 const ParticleOrb: React.FC<ParticleOrbProps> = ({
@@ -23,6 +25,7 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
   color = '94,234,212',
   className = '',
   sectionIds = ['hero', 'brief', 'tracer'],
+  planeIconUrl = '/plan_icon.svg',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -85,6 +88,32 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
     const tilt = -0.55;
     const tiltSin = Math.sin(tilt);
     const tiltCos = Math.cos(tilt);
+
+    // ---- plane sprite (rasterised + recoloured to brand cyan) -----------
+    const PLANE_SPRITE_SIZE = 64;
+    const planeSprite = document.createElement('canvas');
+    planeSprite.width = PLANE_SPRITE_SIZE;
+    planeSprite.height = PLANE_SPRITE_SIZE;
+    const sCtx = planeSprite.getContext('2d');
+    let planeReady = false;
+    if (sCtx && planeIconUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        // Draw silhouette, then recolour using source-in composite
+        sCtx.clearRect(0, 0, PLANE_SPRITE_SIZE, PLANE_SPRITE_SIZE);
+        sCtx.drawImage(img, 0, 0, PLANE_SPRITE_SIZE, PLANE_SPRITE_SIZE);
+        sCtx.globalCompositeOperation = 'source-in';
+        sCtx.fillStyle = `rgb(${color})`;
+        sCtx.fillRect(0, 0, PLANE_SPRITE_SIZE, PLANE_SPRITE_SIZE);
+        sCtx.globalCompositeOperation = 'source-over';
+        planeReady = true;
+      };
+      img.onerror = () => { planeReady = false; };
+      img.src = planeIconUrl;
+    }
+    // Subsample of particles that render as planes when trails-form mix is on
+    const PLANE_STRIDE = 3;
 
     // ---- scroll → form mixing -------------------------------------------
     // formIndex is a float in [0, sectionIds.length - 1]. We blend the two
@@ -205,9 +234,12 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
       const tubeR = baseR * 0.22;
       const persp = baseR * 2.6;
 
-      // When in trails form, anchor vertically near the middle of the viewport
-      // (not the middle of the document) — but our canvas IS fixed-fullscreen,
-      // so cx/cy are already viewport-centred. Good.
+      // planeMix: 0 during hero+brief, smoothly ramps to 1 at tracer.
+      // Only the second transition (brief → tracer) introduces planes.
+      const planeMixRaw = Math.max(0, Math.min(1, formIndex - 1));
+      // Same smoothstep curve used elsewhere so the swap feels graceful
+      const planeMix = planeMixRaw * planeMixRaw * (3 - 2 * planeMixRaw);
+      const dotMix = 1 - planeMix;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
@@ -217,11 +249,41 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
         const sy = cy + y * scale;
         const size = p.baseSize * scale;
         const depthAlpha = Math.min(1, Math.max(0.05, (scale - 0.36) * 1.4));
-        const a = depthAlpha * (0.62 + pulse * 0.28);
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(${color},${a.toFixed(3)})`;
-        ctx.arc(sx, sy, size, 0, Math.PI * 2);
-        ctx.fill();
+
+        // Dot — fades out as we cross into trails form
+        if (dotMix > 0.01) {
+          const aDot = depthAlpha * dotMix * (0.62 + pulse * 0.28);
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color},${aDot.toFixed(3)})`;
+          ctx.arc(sx, sy, size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Plane sprite — only for ~1/3 of particles, only when trails-form is mixing in
+        if (
+          planeReady &&
+          planeMix > 0.01 &&
+          i % PLANE_STRIDE === 0
+        ) {
+          // Sprite size in CSS px; planes should read at a glance
+          const spritePx = Math.max(14, p.baseSize * 18 * scale + 14);
+          const aPlane = depthAlpha * planeMix;
+          const bank = Math.sin(t * 1.2 + p.jitter) * 0.06;
+          ctx.save();
+          ctx.globalAlpha = aPlane;
+          ctx.translate(sx, sy);
+          // The SVG plane is drawn nose-up; rotate +90° so it flies to the right,
+          // plus a tiny per-plane bank so the fleet isn't perfectly uniform.
+          ctx.rotate(Math.PI / 2 + bank);
+          ctx.drawImage(
+            planeSprite,
+            -spritePx / 2,
+            -spritePx / 2,
+            spritePx,
+            spritePx
+          );
+          ctx.restore();
+        }
       }
     };
 
