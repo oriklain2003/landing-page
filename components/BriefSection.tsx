@@ -5,7 +5,7 @@ const BriefSection: React.FC = () => {
   return (
     <section
       id="brief"
-      className="relative min-h-screen w-full flex items-center justify-center px-6 py-32"
+      className="relative min-h-[100svh] w-full flex items-center justify-center px-safe py-24 md:py-32"
     >
       <div className="max-w-5xl mx-auto w-full">
         <motion.div
@@ -19,7 +19,7 @@ const BriefSection: React.FC = () => {
             <span className="block w-8 h-px bg-cyan-300/40" />
             01 — The brief
           </div>
-          <h2 className="font-display text-4xl md:text-7xl font-light leading-[1.02] tracking-tight">
+          <h2 className="font-display text-[clamp(1.75rem,7vw,2.5rem)] md:text-7xl font-light leading-[1.08] md:leading-[1.02] tracking-tight">
             We build the systems that{' '}
             <span className="italic font-normal text-white">decide what's real</span>
             <br />
@@ -27,13 +27,13 @@ const BriefSection: React.FC = () => {
           </h2>
         </motion.div>
 
-        <div className="mt-16 grid md:grid-cols-2 gap-x-16 gap-y-10">
+        <div className="mt-10 md:mt-16 grid md:grid-cols-2 gap-x-16 gap-y-8 md:gap-y-10">
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.9, delay: 0.08, ease: 'easeOut' }}
-            className="text-white/65 text-lg md:text-xl leading-relaxed font-light"
+            className="text-white/65 text-base md:text-xl leading-relaxed font-light"
           >
             <span className="text-white font-normal">ONYX</span> is a defensive-technology
             company building detection layers for infrastructure that was never designed to be
@@ -45,7 +45,7 @@ const BriefSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.9, delay: 0.16, ease: 'easeOut' }}
-            className="text-white/65 text-lg md:text-xl leading-relaxed font-light"
+            className="text-white/65 text-base md:text-xl leading-relaxed font-light"
           >
             Our research today centers on{' '}
             <span className="text-cyan-300">airspace integrity</span> — proving where aircraft

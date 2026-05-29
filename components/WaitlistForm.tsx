@@ -48,7 +48,7 @@ const WaitlistForm: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === 'loading'}
-                className="w-full bg-transparent border-none rounded-2xl px-6 py-4 text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
+                className="w-full bg-transparent border-none rounded-2xl px-6 py-4 text-base text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
                 required
               />
               {/* Internal glow line */}

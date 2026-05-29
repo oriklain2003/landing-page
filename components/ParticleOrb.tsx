@@ -37,7 +37,13 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Mobile gets a lighter field: fewer particles, lower DPR ceiling, and a
+    // calmer frame rate. Same visual language, far less battery/GPU cost.
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
+    const dprCap = isMobile ? 1.5 : 2;
+    const effCount = isMobile ? Math.min(count, 240) : count;
+
+    let dpr = Math.min(window.devicePixelRatio || 1, dprCap);
     let width = 0;
     let height = 0;
     let running = false;
@@ -45,14 +51,14 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
     let docVisible = !document.hidden;
     let rafId: number | null = null;
     let lastFrame = 0;
-    const targetFps = 45;
+    const targetFps = isMobile ? 30 : 45;
     const frameInterval = 1000 / targetFps;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, dprCap);
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -72,13 +78,13 @@ const ParticleOrb: React.FC<ParticleOrbProps> = ({
       tOffset: number;  // phase along the trail
       speed: number;    // x-speed scalar in trail form
     };
-    const particles: P[] = Array.from({ length: count }, (_, i) => ({
+    const particles: P[] = Array.from({ length: effCount }, (_, i) => ({
       theta: Math.random() * Math.PI * 2,
       phi: (Math.random() - 0.5) * 0.9,
       offR: (Math.random() - 0.5) * 32,
       jitter: Math.random() * Math.PI * 2,
       baseSize: 0.5 + Math.random() * 1.5,
-      lane: (i / count) + (Math.random() - 0.5) / count, // even-ish but jittered
+      lane: (i / effCount) + (Math.random() - 0.5) / effCount, // even-ish but jittered
       laneDepth: Math.random(),
       tOffset: Math.random(),
       speed: 0.4 + Math.random() * 0.8,

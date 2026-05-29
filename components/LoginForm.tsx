@@ -31,7 +31,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative z-10 rounded-[48px] bg-black/50 backdrop-blur-[60px] border border-white/10 p-10 overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] flex flex-col"
+        className="relative z-10 rounded-[36px] sm:rounded-[48px] bg-black/50 backdrop-blur-[60px] border border-white/10 p-6 sm:p-10 overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] flex flex-col"
       >
         {/* Molten blue highlight on the top-left edge */}
         <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-cyan-500/10 to-transparent blur-3xl pointer-events-none" />
@@ -155,7 +155,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
                 boxShadow: '0 0 30px rgba(255, 255, 255, 0.03)'
               }}
               whileTap={{ scale: 0.98 }}
-              className="px-12 py-3.5 rounded-full text-[10px] uppercase tracking-[0.4em] font-bold text-white/10 border border-white/5 transition-all duration-500 outline-none"
+              className="px-10 sm:px-12 py-3.5 rounded-full text-[10px] uppercase tracking-[0.35em] sm:tracking-[0.4em] font-bold text-white/10 border border-white/5 transition-all duration-500 outline-none"
             >
               Disconnect
             </motion.button>

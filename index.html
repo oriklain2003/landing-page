@@ -3,7 +3,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ONYX | Coming Soon</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +20,33 @@
       color: #ffffff;
       margin: 0;
       overflow-x: hidden;
+      /* Kill the grey flash on tap and the iOS "long-press" callout */
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
     }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      /* Stop iOS from auto-inflating type in landscape */
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    /* Safe-area aware spacing helpers (notch / Dynamic Island / home indicator).
+       On non-notched devices env() resolves to 0, so these collapse to the
+       desktop spacing baked into the max() floor. */
+    .pt-safe { padding-top: max(1.5rem, calc(env(safe-area-inset-top) + 0.5rem)); }
+    .pb-safe { padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem)); }
+    .px-safe {
+      padding-left: max(1.5rem, env(safe-area-inset-left));
+      padding-right: max(1.5rem, env(safe-area-inset-right));
+    }
+    .bottom-safe { bottom: max(2rem, calc(env(safe-area-inset-bottom) + 0.75rem)); }
+
+    /* 16px is the threshold below which iOS Safari zooms the page on focus.
+       Keep every text field at/above it on small screens. */
+    @media (max-width: 640px) {
+      input, select, textarea { font-size: 16px; }
+    }
     .font-heading {
       font-family: 'Space Grotesk', sans-serif;
     }

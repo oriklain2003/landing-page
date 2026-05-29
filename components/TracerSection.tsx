@@ -14,7 +14,7 @@ const TracerSection: React.FC = () => {
   return (
     <section
       id="tracer"
-      className="relative min-h-screen w-full flex items-center justify-center px-6 py-32"
+      className="relative min-h-[100svh] w-full flex items-center justify-center px-safe py-24 md:py-32"
     >
       <div className="max-w-4xl mx-auto w-full text-center">
         <motion.div
@@ -29,7 +29,7 @@ const TracerSection: React.FC = () => {
             02 — Tracer 42
             <span className="block w-8 h-px bg-cyan-300/40" />
           </div>
-          <h2 className="font-display text-4xl md:text-7xl font-light leading-[1.02] tracking-tight">
+          <h2 className="font-display text-[clamp(1.875rem,8vw,2.75rem)] md:text-7xl font-light leading-[1.05] md:leading-[1.02] tracking-tight">
             The eye on{' '}
             <span className="italic font-normal text-white">every</span> aircraft.
           </h2>
@@ -40,7 +40,7 @@ const TracerSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.9, delay: 0.1, ease: 'easeOut' }}
-          className="mt-10 mx-auto text-white/65 text-lg md:text-xl leading-relaxed font-light max-w-2xl"
+          className="mt-8 md:mt-10 mx-auto text-white/65 text-base md:text-xl leading-relaxed font-light max-w-2xl"
         >
           Tracer 42 monitors, detects, classifies, and reports on anything moving through
           global airspace — in real time. Anomaly detection, live AI agents flagging
