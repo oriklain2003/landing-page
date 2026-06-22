@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import WaitlistForm from './WaitlistForm';
 import BriefSection from './BriefSection';
 import TracerSection from './TracerSection';
+import TwelveSection from './TwelveSection';
 
 const WORDS = ["control", "autonomy", "airspace", "prediction", "detection", "intelligence"];
 
@@ -101,10 +102,10 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
               <span className="relative z-10">Tracer 42</span>
             </a>
             <a
-              href="/cyber/"
+              href="#twelve"
               className={`${navLinkClass} px-2.5 sm:px-5 py-3 rounded-full hover:bg-white/[0.05]`}
             >
-              <span className="relative z-10">Cyber</span>
+              <span className="relative z-10">Twelve</span>
             </a>
 
             <button
@@ -178,6 +179,9 @@ const ComingSoonContent: React.FC<ComingSoonContentProps> = ({ onLoginClick }) =
 
       {/* TRACER 42 */}
       <TracerSection />
+
+      {/* TWELVE */}
+      <TwelveSection />
 
       {/* Footer */}
       <footer className="relative z-10 w-full max-w-7xl mx-auto px-safe pb-safe flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 pt-12 border-t border-white/5 mt-12 text-center md:text-left">

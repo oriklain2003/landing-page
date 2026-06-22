@@ -221,7 +221,7 @@
 <script>
 (function(){
   // Production API base. Override via ?api=https://... for local/dev testing.
-  var DEFAULT_API_BASE = 'https://8g62kxma73.us-east-1.awsapprunner.com';
+  var DEFAULT_API_BASE = 'https://api.onyx-sys.com';
   var params = new URLSearchParams(window.location.search);
   var API_BASE = (params.get('api') || DEFAULT_API_BASE).replace(/\/$/, '');
 
